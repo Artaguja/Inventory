@@ -156,6 +156,20 @@ th {
     margin-top: 20px;
 }
 
+.password-box {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.password-box input {
+    max-width: 320px;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
 #loginBereich {
     min-height: 80vh;
     display: flex;
@@ -223,6 +237,11 @@ th {
     margin: 0;
 }
 
+.admin-user-input {
+    width: 170px;
+    margin: 0;
+}
+
 @media (max-width: 900px) {
     .header {
         flex-direction: column;
@@ -274,6 +293,19 @@ th {
 
     <div id="mainBereich" class="hidden">
 
+        <div class="password-box">
+            <h3>Mein Passwort ändern</h3>
+            <input type="password" id="eigenesAktuellesPasswort" placeholder="Aktuelles Passwort">
+            <input type="password" id="eigenesNeuesPasswort" placeholder="Neues Passwort">
+            <input type="password" id="eigenesNeuesPasswortWiederholen" placeholder="Neues Passwort wiederholen">
+            <button onclick="eigenesPasswortAendern()">Eigenes Passwort ändern</button>
+            <div class="small-note">
+                Jeder Benutzer kann hier sein eigenes Passwort ändern.
+            </div>
+        </div>
+
+        <hr>
+
         <h3 id="produktFormTitel">Produkt hinzufügen</h3>
         <div class="produkt-form">
             <input type="text" id="name" placeholder="Produktname">
@@ -312,6 +344,7 @@ th {
                     <tr>
                         <th>Benutzer</th>
                         <th>Rolle</th>
+                        <th>Neues Passwort</th>
                         <th>Aktion</th>
                     </tr>
                 </thead>
@@ -566,6 +599,10 @@ function bereinigeWarenkorb() {
     speichern();
 }
 
+function safeInputId(text) {
+    return String(text).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 function sendeMindestbestandEmail(produkt, entnommeneMenge) {
     if (!emailIstKonfiguriert()) {
         console.warn("EmailJS ist noch nicht konfiguriert.");
@@ -690,6 +727,79 @@ function login() {
 function logout() {
     aktuellerUser = null;
     location.reload();
+}
+
+function eigenesPasswortAendern() {
+    if (!aktuellerUser) return;
+
+    const aktuellesPasswort = document.getElementById("eigenesAktuellesPasswort").value.trim();
+    const neuesPasswort = document.getElementById("eigenesNeuesPasswort").value.trim();
+    const neuesPasswortWiederholen = document.getElementById("eigenesNeuesPasswortWiederholen").value.trim();
+
+    if (!aktuellesPasswort || !neuesPasswort || !neuesPasswortWiederholen) {
+        alert("Bitte alle Passwortfelder ausfüllen.");
+        return;
+    }
+
+    if (aktuellesPasswort !== aktuellerUser.password) {
+        alert("Das aktuelle Passwort ist falsch.");
+        return;
+    }
+
+    if (neuesPasswort.length < 4) {
+        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
+        return;
+    }
+
+    if (neuesPasswort !== neuesPasswortWiederholen) {
+        alert("Die neuen Passwörter stimmen nicht überein.");
+        return;
+    }
+
+    const userIndex = users.findIndex(u => u.username === aktuellerUser.username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    users[userIndex].password = neuesPasswort;
+    aktuellerUser.password = neuesPasswort;
+    speichern();
+
+    document.getElementById("eigenesAktuellesPasswort").value = "";
+    document.getElementById("eigenesNeuesPasswort").value = "";
+    document.getElementById("eigenesNeuesPasswortWiederholen").value = "";
+
+    alert("Dein Passwort wurde erfolgreich geändert.");
+}
+
+function adminPasswortAendern(username) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const feldId = "adminPasswort_" + safeInputId(username);
+    const neuesPasswort = document.getElementById(feldId).value.trim();
+
+    if (!neuesPasswort) {
+        alert("Bitte ein neues Passwort eingeben.");
+        return;
+    }
+
+    if (neuesPasswort.length < 4) {
+        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
+        return;
+    }
+
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    users[userIndex].password = neuesPasswort;
+    speichern();
+    document.getElementById(feldId).value = "";
+
+    alert(`Passwort für "${username}" wurde geändert.`);
 }
 
 function produktSpeichern() {
@@ -1151,14 +1261,20 @@ function userAnzeigen() {
     const userTabelle = document.getElementById("userTabelle");
     userTabelle.innerHTML = "";
 
-    users.forEach((u, index) => {
+    users.forEach((u) => {
         if (u.rolle !== "admin") {
+            const feldId = "adminPasswort_" + safeInputId(u.username);
+
             userTabelle.innerHTML += `
                 <tr>
                     <td>${u.username}</td>
                     <td>${u.rolle.toUpperCase()}</td>
                     <td>
-                        <button class="delete-btn" onclick="artistLoeschen(${index})">Löschen</button>
+                        <input class="admin-user-input" type="password" id="${feldId}" placeholder="Neues Passwort">
+                    </td>
+                    <td>
+                        <button class="edit-btn" onclick="adminPasswortAendern('${u.username.replace(/'/g, "\\'")}')">Passwort ändern</button>
+                        <button class="delete-btn" onclick="artistLoeschen('${u.username.replace(/'/g, "\\'")}')">Löschen</button>
                     </td>
                 </tr>
             `;
@@ -1166,13 +1282,19 @@ function userAnzeigen() {
     });
 }
 
-function artistLoeschen(index) {
+function artistLoeschen(username) {
     if (aktuellerUser?.rolle !== "admin") return;
 
-    const bestaetigt = confirm(`ARTIST "${users[index].username}" wirklich löschen?`);
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    const bestaetigt = confirm(`ARTIST "${users[userIndex].username}" wirklich löschen?`);
     if (!bestaetigt) return;
 
-    users.splice(index, 1);
+    users.splice(userIndex, 1);
     speichern();
     userAnzeigen();
 }
