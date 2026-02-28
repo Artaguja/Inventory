@@ -323,7 +323,7 @@ th {
             <h3>E-Mail Benachrichtigung</h3>
             <button class="mail-btn" onclick="testEmailSenden()">Testmail senden</button>
             <div class="small-note">
-                Trage im Code deinen Public Key, Service ID und Template ID von EmailJS ein.
+                Public Key, Service ID und Template ID sind im Code eingetragen.
             </div>
 
             <hr>
@@ -400,6 +400,12 @@ const EMAILJS_PUBLIC_KEY = "702W46bqfrYjYj2T5";
 const EMAILJS_SERVICE_ID = "service_qy3c5ul";
 const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
 const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
+
+if (typeof emailjs !== "undefined") {
+    emailjs.init({
+        publicKey: EMAILJS_PUBLIC_KEY
+    });
+}
 
 const firebaseConfig = {
     apiKey: "AIzaSyBYwbDcLCJk53mdy8XtQTYAJ2OrlsDuzqk",
@@ -570,7 +576,7 @@ function sendeMindestbestandEmail(produkt, entnommeneMenge) {
         to_email: BENACHRICHTIGUNGS_EMAIL,
         produkt_name: produkt.name,
         kategorie: produkt.kategorie,
-        lieferant: produkt.lieferantenHomepage,
+        lieferant: produkt.lieferantenHomepage || "-",
         aktueller_bestand: produkt.menge,
         mindestbestand: produkt.mindestmenge,
         entnommene_menge: entnommeneMenge,
@@ -581,7 +587,7 @@ function sendeMindestbestandEmail(produkt, entnommeneMenge) {
 
 Produkt: ${produkt.name}
 Kategorie: ${produkt.kategorie}
-Lieferant: ${produkt.lieferantenHomepage}
+Lieferant: ${produkt.lieferantenHomepage || "-"}
 Aktueller Bestand: ${produkt.menge}
 Mindestbestand: ${produkt.mindestmenge}
 Entnommene Menge: ${entnommeneMenge}
@@ -592,7 +598,10 @@ Zeitpunkt: ${datumDeutsch()}`
     return emailjs.send(
         EMAILJS_SERVICE_ID,
         EMAILJS_TEMPLATE_ID,
-        templateParams
+        templateParams,
+        {
+            publicKey: EMAILJS_PUBLIC_KEY
+        }
     );
 }
 
