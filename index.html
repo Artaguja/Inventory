@@ -156,7 +156,6 @@ th {
     margin-top: 20px;
 }
 
-/* Login zentral */
 #loginBereich {
     min-height: 80vh;
     display: flex;
@@ -209,7 +208,6 @@ th {
     font-size: 16px;
 }
 
-/* Produktformular links untereinander */
 .produkt-form {
     display: flex;
     flex-direction: column;
@@ -992,7 +990,6 @@ function warenkorbAuschecken() {
 
     for (let eintrag of warenkorb) {
         const produkt = getProduktById(eintrag.produktId);
-        const alterBestand = produkt.menge;
 
         produkt.menge -= eintrag.menge;
 
@@ -1004,7 +1001,7 @@ function warenkorbAuschecken() {
         });
 
         const mindestbestandNeuUnterschritten =
-    produkt.menge <= produkt.mindestmenge;
+            produkt.menge <= produkt.mindestmenge;
 
         if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
             emailBenachrichtigungen.push({
@@ -1026,8 +1023,12 @@ function warenkorbAuschecken() {
 
     emailBenachrichtigungen.forEach(eintrag => {
         sendeMindestbestandEmail(eintrag.produkt, eintrag.menge)
+            .then(() => {
+                console.log(`E-Mail für ${eintrag.produkt.name} erfolgreich gesendet.`);
+            })
             .catch(error => {
                 console.error("E-Mail Versand fehlgeschlagen:", error);
+                alert(`E-Mail für "${eintrag.produkt.name}" konnte nicht versendet werden. Bitte Browser-Konsole prüfen.`);
             });
     });
 
