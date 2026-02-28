@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ART AGUJA INVENTORY SYSTEM</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+}
+
+.header {
+    background: black;
+    color: white;
+    padding: 28px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    min-height: 90px;
+    box-sizing: border-box;
+}
+
+.header-left {
+    font-weight: bold;
+    z-index: 2;
+}
+
+.header-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.header-logo {
+    width: 90px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.header-right {
+    z-index: 2;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 40px auto 20px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+input, button, select {
+    padding: 10px;
+    margin: 5px;
+    font-size: 15px;
+}
+
+button {
+    background: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+th {
+    background: black;
+    color: white;
+}
+
+.low-stock {
+    background: #ffb3b3;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.action-btn {
+    margin: 2px;
+    padding: 6px 10px;
+}
+
+.edit-btn {
+    background: #444;
+}
+
+.delete-btn {
+    background: #7a0000;
+}
+
+.restock-btn {
+    background: #0d5c2f;
+}
+
+.mail-btn {
+    background: #1b4d8a;
+}
+
+.cart-btn {
+    background: #444;
+}
+
+.checkout-btn {
+    background: #0d5c2f;
+}
+
+.bulk-cart-btn {
+    background: #444;
+    margin-top: 10px;
+}
+
+.info-box {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.small-note {
+    font-size: 13px;
+    color: #555;
+    margin-top: 10px;
+}
+
+.cart-box {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+/* Login zentral */
+#loginBereich {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    text-align: center;
+}
+
+.login-logo {
+    width: 120px;
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto 20px auto;
+}
+
+.login-box h1 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 32px;
+    letter-spacing: 1px;
+}
+
+.login-box h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+}
+
+.login-box input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    margin: 10px 0;
+    font-size: 16px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+/* Produktformular links untereinander */
+.produkt-form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 320px;
+    gap: 8px;
+}
+
+.produkt-form input,
+.produkt-form button {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+@media (max-width: 900px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .header-center {
+        position: static;
+        transform: none;
+        order: -1;
+    }
+
+    .header-left,
+    .header-right {
+        text-align: center;
+    }
+}
+</style>
+</head>
+<body>
+
+<div class="header hidden" id="header">
+    <div class="header-left"><strong>ART AGUJA INVENTORY SYSTEM</strong></div>
+
+    <div class="header-center">
+        <img src="logo2.png" alt="ART AGUJA Logo" class="header-logo">
+    </div>
+
+    <div class="header-right">
+        Eingeloggt als: <span id="userInfo"></span>
+        <button onclick="logout()">Abmelden</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <div id="loginBereich">
+        <div class="login-box">
+            <img src="logo.png" alt="ART AGUJA Logo" class="login-logo">
+            <h1>ART AGUJA INVENTORY</h1>
+            <h2>Login</h2>
+            <input type="text" id="loginUser" placeholder="Benutzername">
+            <input type="password" id="loginPass" placeholder="Passwort">
+            <button onclick="login()">Anmelden</button>
+        </div>
+    </div>
+
+    <div id="mainBereich" class="hidden">
+
+        <h3 id="produktFormTitel">Produkt hinzufügen</h3>
+        <div class="produkt-form">
+            <input type="text" id="name" placeholder="Produktname">
+            <input type="text" id="kategorie" placeholder="Kategorie">
+            <input type="number" id="menge" placeholder="Bestand" min="0">
+            <input type="number" id="mindestmenge" placeholder="Mindestmenge" min="0">
+            <input type="text" id="lieferantenHomepage" placeholder="Lieferanten Homepage">
+            <button id="addBtn" onclick="produktSpeichern()">Speichern</button>
+            <button id="cancelEditBtn" class="hidden" onclick="bearbeitungAbbrechen()">Abbrechen</button>
+        </div>
+
+        <hr>
+
+        <div class="info-box">
+            <strong>Suche / Filter</strong><br>
+            <input type="text" id="suche" placeholder="Nach Produkt oder Kategorie suchen..." oninput="produkteAnzeigen()">
+            <select id="lagerFilter" onchange="produkteAnzeigen()">
+                <option value="alle">Alle Bestände</option>
+                <option value="niedrig">Nur niedriger Bestand</option>
+            </select>
+            <div class="small-note">
+                Rot markierte Produkte haben den Mindestbestand erreicht oder unterschritten.
+            </div>
+        </div>
+
+        <div id="adminBereich" class="hidden">
+            <hr>
+
+            <h3>ARTIST Verwaltung</h3>
+            <input type="text" id="neuUser" placeholder="Benutzername">
+            <input type="password" id="neuPass" placeholder="Passwort">
+            <button onclick="artistHinzufuegen()">Hinzufügen</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Benutzer</th>
+                        <th>Rolle</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="userTabelle"></tbody>
+            </table>
+
+            <hr>
+
+            <h3>E-Mail Benachrichtigung</h3>
+            <button class="mail-btn" onclick="testEmailSenden()">Testmail senden</button>
+            <div class="small-note">
+                Trage im Code deinen Public Key, Service ID und Template ID von EmailJS ein.
+            </div>
+
+            <hr>
+
+            <h3>Entnahme Historie</h3>
+            <button onclick="excelExport()">Historie als Excel exportieren</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>ARTIST</th>
+                        <th>Produkt</th>
+                        <th>Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="historieTabelle"></tbody>
+            </table>
+
+            <hr>
+
+            <h3>ARTIST Statistik</h3>
+            <button class="delete-btn" onclick="statistikZuruecksetzen()">Statistik zurücksetzen</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ARTIST</th>
+                        <th>Gesamt entnommene Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="statistikTabelle"></tbody>
+            </table>
+        </div>
+
+        <hr>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Kategorie</th>
+                    <th>Bestand</th>
+                    <th>Mindestmenge</th>
+                    <th>Lieferant</th>
+                    <th>Menge</th>
+                    <th id="verwaltungsSpalte">Verwaltung</th>
+                </tr>
+            </thead>
+            <tbody id="produktTabelle"></tbody>
+        </table>
+
+        <button class="bulk-cart-btn" onclick="alleEingabenInWarenkorb()">Ausgewählte Mengen in den Warenkorb</button>
+
+        <div class="cart-box">
+            <h3>Warenkorb</h3>
+            <button class="checkout-btn" onclick="warenkorbAuschecken()">Warenkorb komplett auschecken</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategorie</th>
+                        <th>Menge</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="warenkorbTabelle"></tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<script>
+const EMAILJS_PUBLIC_KEY = "702W46bqfrYjYj2T5";
+const EMAILJS_SERVICE_ID = "service_qy3c5ul";
+const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
+const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
+
+let produkte = JSON.parse(localStorage.getItem("produkte")) || [];
+let entnahmen = JSON.parse(localStorage.getItem("entnahmen")) || [];
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
+
+let aktuellerUser = null;
+let bearbeiteIndex = -1;
+
+/* Produkt-IDs sicherstellen */
+produkte = produkte.map(p => ({
+    id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+    name: p.name || "",
+    kategorie: p.kategorie || "",
+    menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
+    mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
+    lieferantenHomepage: p.lieferantenHomepage || ""
+}));
+
+if (!Array.isArray(users)) {
+    users = [];
+}
+
+users = users.map(u => {
+    let rolle = (u.rolle || "").toString().toLowerCase().trim();
+
+    if (rolle === "mitarbeiter") rolle = "artist";
+    if (rolle !== "admin" && rolle !== "artist") {
+        rolle = "artist";
+    }
+
+    return {
+        username: (u.username || "").toString(),
+        password: (u.password || "").toString(),
+        rolle: rolle
+    };
+});
+
+const adminIndex = users.findIndex(u => u.rolle === "admin");
+
+if (adminIndex === -1) {
+    users.unshift({
+        username: "Salva",
+        password: "1307",
+        rolle: "admin"
+    });
+} else {
+    users[adminIndex].username = "Salva";
+    users[adminIndex].password = "1307";
+    users[adminIndex].rolle = "admin";
+}
+
+localStorage.setItem("users", JSON.stringify(users));
+localStorage.setItem("produkte", JSON.stringify(produkte));
+
+if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY") {
+    emailjs.init({
+        publicKey: EMAILJS_PUBLIC_KEY
+    });
+}
+
+function login() {
+    const user = document.getElementById("loginUser").value.trim();
+    const pass = document.getElementById("loginPass").value.trim();
+
+    const gefunden = users.find(u => u.username === user && u.password === pass);
+    if (!gefunden) {
+        alert("Falsche Daten");
+        return;
+    }
+
+    aktuellerUser = gefunden;
+
+    document.getElementById("loginBereich").classList.add("hidden");
+    document.getElementById("loginBereich").style.display = "none";
+    document.getElementById("mainBereich").classList.remove("hidden");
+    document.getElementById("header").classList.remove("hidden");
+
+    document.getElementById("userInfo").innerText =
+        `${aktuellerUser.username} (${aktuellerUser.rolle.toUpperCase()})`;
+
+    if (aktuellerUser.rolle === "admin") {
+        document.getElementById("adminBereich").classList.remove("hidden");
+        document.getElementById("verwaltungsSpalte").style.display = "";
+        document.getElementById("addBtn").style.display = "";
+        document.getElementById("produktFormTitel").style.display = "";
+        document.getElementById("name").style.display = "";
+        document.getElementById("kategorie").style.display = "";
+        document.getElementById("menge").style.display = "";
+        document.getElementById("mindestmenge").style.display = "";
+        document.getElementById("lieferantenHomepage").style.display = "";
+        userAnzeigen();
+        historieAnzeigen();
+        statistikAnzeigen();
+    } else {
+        document.getElementById("adminBereich").classList.add("hidden");
+        document.getElementById("verwaltungsSpalte").style.display = "none";
+        document.getElementById("addBtn").style.display = "none";
+        document.getElementById("produktFormTitel").style.display = "none";
+        document.getElementById("name").style.display = "none";
+        document.getElementById("kategorie").style.display = "none";
+        document.getElementById("menge").style.display = "none";
+        document.getElementById("mindestmenge").style.display = "none";
+        document.getElementById("lieferantenHomepage").style.display = "none";
+        document.getElementById("cancelEditBtn").style.display = "none";
+    }
+
+    bereinigeWarenkorb();
+    produkteAnzeigen();
+    warenkorbAnzeigen();
+}
+
+function logout() {
+    aktuellerUser = null;
+    location.reload();
+}
+
+function speichern() {
+    localStorage.setItem("produkte", JSON.stringify(produkte));
+    localStorage.setItem("entnahmen", JSON.stringify(entnahmen));
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("warenkorb", JSON.stringify(warenkorb));
+}
+
+function formLeeren() {
+    document.getElementById("name").value = "";
+    document.getElementById("kategorie").value = "";
+    document.getElementById("menge").value = "";
+    document.getElementById("mindestmenge").value = "";
+    document.getElementById("lieferantenHomepage").value = "";
+}
+
+function sichereURL(url) {
+    if (!url) return "";
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return "https://" + url;
+    }
+    return url;
+}
+
+function datumDeutsch() {
+    return new Date().toLocaleString("de-DE");
+}
+
+function istGleichesProdukt(a, b) {
+    return a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
+           a.kategorie.trim().toLowerCase() === b.kategorie.trim().toLowerCase();
+}
+
+function emailIstKonfiguriert() {
+    return EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY" &&
+           EMAILJS_SERVICE_ID !== "DEIN_SERVICE_ID" &&
+           EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
+}
+
+function getProduktById(id) {
+    return produkte.find(p => p.id === id);
+}
+
+function berechneMengeImWarenkorb(produktId) {
+    return warenkorb
+        .filter(w => w.produktId === produktId)
+        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
+}
+
+function bereinigeWarenkorb() {
+    warenkorb = warenkorb.filter(w => {
+        const produkt = getProduktById(w.produktId);
+        return !!produkt;
+    });
+    speichern();
+}
+
+function sendeMindestbestandEmail(produkt, entnommeneMenge) {
+    if (!emailIstKonfiguriert()) {
+        console.warn("EmailJS ist noch nicht konfiguriert.");
+        return Promise.reject("EmailJS nicht konfiguriert");
+    }
+
+    const templateParams = {
+        to_email: BENACHRICHTIGUNGS_EMAIL,
+        produkt_name: produkt.name,
+        kategorie: produkt.kategorie,
+        lieferant: produkt.lieferantenHomepage,
+        aktueller_bestand: produkt.menge,
+        mindestbestand: produkt.mindestmenge,
+        entnommene_menge: entnommeneMenge,
+        artist: aktuellerUser ? aktuellerUser.username : "System",
+        zeitpunkt: datumDeutsch(),
+        nachricht:
+`Der Mindestbestand wurde unterschritten.
+
+Produkt: ${produkt.name}
+Kategorie: ${produkt.kategorie}
+Lieferant: ${produkt.lieferantenHomepage}
+Aktueller Bestand: ${produkt.menge}
+Mindestbestand: ${produkt.mindestmenge}
+Entnommene Menge: ${entnommeneMenge}
+ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
+Zeitpunkt: ${datumDeutsch()}`
+    };
+
+    return emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+    );
+}
+
+function testEmailSenden() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    if (!emailIstKonfiguriert()) {
+        alert("Bitte zuerst EmailJS konfigurieren: Public Key, Service ID und Template ID eintragen.");
+        return;
+    }
+
+    const testProdukt = {
+        name: "Testprodukt",
+        kategorie: "Testkategorie",
+        menge: 1,
+        mindestmenge: 3,
+        lieferantenHomepage: "-"
+    };
+
+    sendeMindestbestandEmail(testProdukt, 1)
+        .then(() => {
+            alert("Testmail wurde versendet.");
+        })
+        .catch((error) => {
+            console.error("Testmail fehlgeschlagen:", error);
+            alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
+        });
+}
+
+function produktSpeichern() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const produktName = document.getElementById("name").value.trim();
+    const produktKategorie = document.getElementById("kategorie").value.trim();
+    const produktMenge = parseInt(document.getElementById("menge").value);
+    const produktMindestmenge = parseInt(document.getElementById("mindestmenge").value);
+    const produktLieferantenHomepage = sichereURL(document.getElementById("lieferantenHomepage").value.trim());
+
+    if (!produktName || !produktKategorie || isNaN(produktMenge) || isNaN(produktMindestmenge)) {
+        alert("Bitte alle Produktfelder korrekt ausfüllen.");
+        return;
+    }
+
+    if (produktMenge < 0 || produktMindestmenge < 0) {
+        alert("Bestand und Mindestmenge dürfen nicht negativ sein.");
+        return;
+    }
+
+    const produkt = {
+        id: bearbeiteIndex === -1 ? ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)) : produkte[bearbeiteIndex].id,
+        name: produktName,
+        kategorie: produktKategorie,
+        menge: produktMenge,
+        mindestmenge: produktMindestmenge,
+        lieferantenHomepage: produktLieferantenHomepage
+    };
+
+    if (bearbeiteIndex === -1) {
+        const vorhandenesProduktIndex = produkte.findIndex(p => istGleichesProdukt(p, produkt));
+
+        if (vorhandenesProduktIndex !== -1) {
+            const bestaetigt = confirm(
+                `Dieses Produkt existiert bereits.\n\nSoll der vorhandene Bestand stattdessen aufgestockt werden?`
+            );
+
+            if (bestaetigt) {
+                produkte[vorhandenesProduktIndex].menge += produktMenge;
+                produkte[vorhandenesProduktIndex].mindestmenge = produktMindestmenge;
+
+                if (produktLieferantenHomepage) {
+                    produkte[vorhandenesProduktIndex].lieferantenHomepage = produktLieferantenHomepage;
+                }
+
+                speichern();
+                produkteAnzeigen();
+                formLeeren();
+                bearbeitungAbbrechen();
+                alert(`Bestand von "${produktName}" wurde erfolgreich aufgestockt.`);
+                return;
+            } else {
+                return;
+            }
+        }
+
+        produkte.push(produkt);
+    } else {
+        produkte[bearbeiteIndex] = produkt;
+        warenkorb = warenkorb.map(w => {
+            if (w.produktId === produkt.id) {
+                return {
+                    ...w,
+                    name: produkt.name,
+                    kategorie: produkt.kategorie
+                };
+            }
+            return w;
+        });
+    }
+
+    speichern();
+    produkteAnzeigen();
+    warenkorbAnzeigen();
+    formLeeren();
+    bearbeitungAbbrechen();
+}
+
+function produkteAnzeigen() {
+    const tabelle = document.getElementById("produktTabelle");
+    tabelle.innerHTML = "";
+
+    const suchbegriff = document.getElementById("suche")?.value.toLowerCase() || "";
+    const lagerFilter = document.getElementById("lagerFilter")?.value || "alle";
+
+    produkte.forEach((p, index) => {
+        const name = (p.name || "").toLowerCase();
+        const kategorie = (p.kategorie || "").toLowerCase();
+
+        const passtSuche = name.includes(suchbegriff) || kategorie.includes(suchbegriff);
+        const istNiedrig = p.menge <= p.mindestmenge;
+        const passtFilter = lagerFilter === "alle" || (lagerFilter === "niedrig" && istNiedrig);
+
+        if (!passtSuche || !passtFilter) return;
+
+        const linkHTML = p.lieferantenHomepage
+            ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
+            : `-`;
+
+        const verwaltungHTML = aktuellerUser?.rolle === "admin"
+            ? `
+                <button class="action-btn edit-btn" onclick="produktBearbeiten(${index})">Bearbeiten</button>
+                <button class="action-btn restock-btn" onclick="produktAufstocken(${index})">Aufstocken</button>
+                <button class="action-btn delete-btn" onclick="produktLoeschen(${index})">Löschen</button>
+              `
+            : ``;
+
+        tabelle.innerHTML += `
+            <tr class="${istNiedrig ? 'low-stock' : ''}">
+                <td>${p.name}</td>
+                <td>${p.kategorie}</td>
+                <td>${p.menge}</td>
+                <td>${p.mindestmenge}</td>
+                <td>${linkHTML}</td>
+                <td>
+                    <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
+                </td>
+                <td ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
+                    ${verwaltungHTML}
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function produktBearbeiten(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const p = produkte[index];
+    document.getElementById("name").value = p.name;
+    document.getElementById("kategorie").value = p.kategorie;
+    document.getElementById("menge").value = p.menge;
+    document.getElementById("mindestmenge").value = p.mindestmenge;
+    document.getElementById("lieferantenHomepage").value = p.lieferantenHomepage || "";
+
+    bearbeiteIndex = index;
+    document.getElementById("produktFormTitel").innerText = "Produkt bearbeiten";
+    document.getElementById("addBtn").innerText = "Änderung speichern";
+    document.getElementById("cancelEditBtn").classList.remove("hidden");
+}
+
+function produktAufstocken(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const mengeString = prompt(`Wie viele Stück von "${produkte[index].name}" sollen aufgestockt werden?`, "1");
+    if (mengeString === null) return;
+
+    const aufstockMenge = parseInt(mengeString);
+
+    if (isNaN(aufstockMenge) || aufstockMenge <= 0) {
+        alert("Bitte eine gültige Menge eingeben.");
+        return;
+    }
+
+    produkte[index].menge += aufstockMenge;
+    speichern();
+    produkteAnzeigen();
+
+    alert(`Bestand von "${produkte[index].name}" wurde um ${aufstockMenge} erhöht.`);
+}
+
+function bearbeitungAbbrechen() {
+    bearbeiteIndex = -1;
+    document.getElementById("produktFormTitel").innerText = "Produkt hinzufügen";
+    document.getElementById("addBtn").innerText = "Speichern";
+    document.getElementById("cancelEditBtn").classList.add("hidden");
+    formLeeren();
+}
+
+function produktLoeschen(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const bestaetigt = confirm(`Produkt "${produkte[index].name}" wirklich löschen?`);
+    if (!bestaetigt) return;
+
+    const geloeschteProduktId = produkte[index].id;
+
+    produkte.splice(index, 1);
+    warenkorb = warenkorb.filter(w => w.produktId !== geloeschteProduktId);
+
+    speichern();
+    produkteAnzeigen();
+    warenkorbAnzeigen();
+}
+
+function alleEingabenInWarenkorb() {
+    let hatMindestensEineMenge = false;
+
+    for (let produkt of produkte) {
+        const feld = document.getElementById("entnahme" + produkt.id);
+        if (!feld) continue;
+
+        const rohwert = feld.value.trim();
+        if (rohwert === "") continue;
+
+        const menge = parseInt(rohwert);
+
+        if (isNaN(menge) || menge < 0) {
+            alert(`Ungültige Menge bei "${produkt.name}".`);
+            return;
+        }
+
+        if (menge === 0) continue;
+
+        hatMindestensEineMenge = true;
+
+        const bereitsImWarenkorb = berechneMengeImWarenkorb(produkt.id);
+        if (bereitsImWarenkorb + menge > produkt.menge) {
+            alert(`Nicht genug Bestand für "${produkt.name}".`);
+            return;
+        }
+    }
+
+    if (!hatMindestensEineMenge) {
+        alert("Bitte zuerst Mengen bei den Produkten eintragen.");
+        return;
+    }
+
+    for (let produkt of produkte) {
+        const feld = document.getElementById("entnahme" + produkt.id);
+        if (!feld) continue;
+
+        const rohwert = feld.value.trim();
+        if (rohwert === "") continue;
+
+        const menge = parseInt(rohwert);
+        if (isNaN(menge) || menge <= 0) continue;
+
+        const vorhandenerEintrag = warenkorb.find(w => w.produktId === produkt.id);
+
+        if (vorhandenerEintrag) {
+            vorhandenerEintrag.menge += menge;
+        } else {
+            warenkorb.push({
+                produktId: produkt.id,
+                name: produkt.name,
+                kategorie: produkt.kategorie,
+                menge: menge
+            });
+        }
+
+        feld.value = "";
+    }
+
+    speichern();
+    warenkorbAnzeigen();
+    alert("Alle eingetragenen Mengen wurden in den Warenkorb gelegt.");
+}
+
+function warenkorbAnzeigen() {
+    const tabelle = document.getElementById("warenkorbTabelle");
+    if (!tabelle) return;
+
+    tabelle.innerHTML = "";
+
+    if (warenkorb.length === 0) {
+        tabelle.innerHTML = `
+            <tr>
+                <td colspan="4">Warenkorb ist leer.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    warenkorb.forEach((eintrag, index) => {
+        tabelle.innerHTML += `
+            <tr>
+                <td>${eintrag.name}</td>
+                <td>${eintrag.kategorie}</td>
+                <td>${eintrag.menge}</td>
+                <td>
+                    <button class="delete-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function ausWarenkorbEntfernen(index) {
+    warenkorb.splice(index, 1);
+    speichern();
+    warenkorbAnzeigen();
+}
+
+function warenkorbAuschecken() {
+    if (warenkorb.length === 0) {
+        alert("Der Warenkorb ist leer.");
+        return;
+    }
+
+    for (let eintrag of warenkorb) {
+        const produkt = getProduktById(eintrag.produktId);
+
+        if (!produkt) {
+            alert(`Produkt "${eintrag.name}" wurde nicht gefunden.`);
+            return;
+        }
+
+        if (eintrag.menge > produkt.menge) {
+            alert(`Nicht genug Bestand für "${produkt.name}".`);
+            return;
+        }
+    }
+
+    let emailBenachrichtigungen = [];
+
+    for (let eintrag of warenkorb) {
+        const produkt = getProduktById(eintrag.produktId);
+        const alterBestand = produkt.menge;
+
+        produkt.menge -= eintrag.menge;
+
+        entnahmen.push({
+            datum: datumDeutsch(),
+            artist: aktuellerUser.username,
+            produkt: produkt.name,
+            menge: eintrag.menge
+        });
+
+        const mindestbestandNeuUnterschritten =
+            alterBestand > produkt.mindestmenge &&
+            produkt.menge <= produkt.mindestmenge;
+
+        if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
+            emailBenachrichtigungen.push({
+                produkt: produkt,
+                menge: eintrag.menge
+            });
+        }
+    }
+
+    warenkorb = [];
+    speichern();
+    produkteAnzeigen();
+    warenkorbAnzeigen();
+
+    if (aktuellerUser.rolle === "admin") {
+        historieAnzeigen();
+        statistikAnzeigen();
+    }
+
+    emailBenachrichtigungen.forEach(eintrag => {
+        sendeMindestbestandEmail(eintrag.produkt, eintrag.menge)
+            .catch(error => {
+                console.error("E-Mail Versand fehlgeschlagen:", error);
+            });
+    });
+
+    alert("Warenkorb wurde erfolgreich ausgecheckt.");
+}
+
+function historieAnzeigen() {
+    const tabelle = document.getElementById("historieTabelle");
+    tabelle.innerHTML = "";
+
+    [...entnahmen].reverse().slice(0, 5).forEach(e => {
+        tabelle.innerHTML += `
+            <tr>
+                <td>${e.datum}</td>
+                <td>${e.artist}</td>
+                <td>${e.produkt}</td>
+                <td>${e.menge}</td>
+            </tr>
+        `;
+    });
+}
+
+function statistikAnzeigen() {
+    const stats = {};
+
+    entnahmen.forEach(e => {
+        stats[e.artist] = (stats[e.artist] || 0) + e.menge;
+    });
+
+    const statistikTabelle = document.getElementById("statistikTabelle");
+    statistikTabelle.innerHTML = "";
+
+    const userKeys = Object.keys(stats);
+
+    if (userKeys.length === 0) {
+        statistikTabelle.innerHTML = `
+            <tr>
+                <td colspan="2">Keine Statistik vorhanden.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    userKeys.forEach(user => {
+        statistikTabelle.innerHTML += `
+            <tr>
+                <td>${user}</td>
+                <td>${stats[user]}</td>
+            </tr>
+        `;
+    });
+}
+
+function statistikZuruecksetzen() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const bestaetigt = confirm("Möchtest du wirklich die komplette Statistik und Entnahme-Historie zurücksetzen?");
+    if (!bestaetigt) return;
+
+    entnahmen = [];
+    speichern();
+    historieAnzeigen();
+    statistikAnzeigen();
+
+    alert("Statistik und Entnahme-Historie wurden zurückgesetzt.");
+}
+
+function excelExport() {
+    if (entnahmen.length === 0) {
+        alert("Keine Historie vorhanden.");
+        return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(entnahmen);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Historie");
+    XLSX.writeFile(workbook, "Entnahme_Historie.xlsx");
+}
+
+function artistHinzufuegen() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const username = document.getElementById("neuUser").value.trim();
+    const password = document.getElementById("neuPass").value.trim();
+
+    if (!username || !password) {
+        alert("Bitte Benutzername und Passwort eingeben.");
+        return;
+    }
+
+    const existiertSchon = users.some(u => u.username.toLowerCase() === username.toLowerCase());
+    if (existiertSchon) {
+        alert("Benutzername existiert bereits.");
+        return;
+    }
+
+    users.push({
+        username: username,
+        password: password,
+        rolle: "artist"
+    });
+
+    speichern();
+    userAnzeigen();
+
+    document.getElementById("neuUser").value = "";
+    document.getElementById("neuPass").value = "";
+}
+
+function userAnzeigen() {
+    const userTabelle = document.getElementById("userTabelle");
+    userTabelle.innerHTML = "";
+
+    users.forEach((u, index) => {
+        if (u.rolle !== "admin") {
+            userTabelle.innerHTML += `
+                <tr>
+                    <td>${u.username}</td>
+                    <td>${u.rolle.toUpperCase()}</td>
+                    <td>
+                        <button class="delete-btn" onclick="artistLoeschen(${index})">Löschen</button>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+}
+
+function artistLoeschen(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const bestaetigt = confirm(`ARTIST "${users[index].username}" wirklich löschen?`);
+    if (!bestaetigt) return;
+
+    users.splice(index, 1);
+    speichern();
+    userAnzeigen();
+}
+
+document.getElementById("loginUser").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        login();
+    }
+});
+
+document.getElementById("loginPass").addEventListener("keydown", function(event) {
+    if (event.key === "Enter") {
+        login();
+    }
+});
+</script>
+
+</body>
+</html>
