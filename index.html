@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8"
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ART AGUJA INVENTORY SYSTEM</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore-compat.js"></script>
 
 <style>
 body {
@@ -401,127 +403,114 @@ const EMAILJS_SERVICE_ID = "service_qy3c5ul";
 const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
 const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
 
-let produkte = JSON.parse(localStorage.getItem("produkte")) || [];
-let entnahmen = JSON.parse(localStorage.getItem("entnahmen")) || [];
-let users = JSON.parse(localStorage.getItem("users")) || [];
-let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
+const firebaseConfig = {
+    apiKey: "AIzaSyBYwbDcLCJk53mdy8XtQTYAJ2OrlsDuzqk",
+    authDomain: "inventory-db037.firebaseapp.com",
+    projectId: "inventory-db037",
+    storageBucket: "inventory-db037.firebasestorage.app",
+    messagingSenderId: "511415225217",
+    appId: "1:511415225217:web:f08b9e7007d0a19184b680"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const appDoc = db.collection("app").doc("inventoryData");
+
+let produkte = [];
+let entnahmen = [];
+let users = [];
+let warenkorb = [];
 
 let aktuellerUser = null;
 let bearbeiteIndex = -1;
+let datenGeladen = false;
 
-/* Produkt-IDs sicherstellen */
-produkte = produkte.map(p => ({
-    id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
-    name: p.name || "",
-    kategorie: p.kategorie || "",
-    menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
-    mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
-    lieferantenHomepage: p.lieferantenHomepage || ""
-}));
+function datenNormalisieren() {
+    produkte = Array.isArray(produkte) ? produkte : [];
+    entnahmen = Array.isArray(entnahmen) ? entnahmen : [];
+    users = Array.isArray(users) ? users : [];
+    warenkorb = Array.isArray(warenkorb) ? warenkorb : [];
 
-if (!Array.isArray(users)) {
-    users = [];
-}
+    produkte = produkte.map(p => ({
+        id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+        name: p.name || "",
+        kategorie: p.kategorie || "",
+        menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
+        mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
+        lieferantenHomepage: p.lieferantenHomepage || ""
+    }));
 
-users = users.map(u => {
-    let rolle = (u.rolle || "").toString().toLowerCase().trim();
+    users = users.map(u => {
+        let rolle = (u.rolle || "").toString().toLowerCase().trim();
 
-    if (rolle === "mitarbeiter") rolle = "artist";
-    if (rolle !== "admin" && rolle !== "artist") {
-        rolle = "artist";
-    }
+        if (rolle === "mitarbeiter") rolle = "artist";
+        if (rolle !== "admin" && rolle !== "artist") {
+            rolle = "artist";
+        }
 
-    return {
-        username: (u.username || "").toString(),
-        password: (u.password || "").toString(),
-        rolle: rolle
-    };
-});
-
-const adminIndex = users.findIndex(u => u.rolle === "admin");
-
-if (adminIndex === -1) {
-    users.unshift({
-        username: "Salva",
-        password: "1307",
-        rolle: "admin"
+        return {
+            username: (u.username || "").toString(),
+            password: (u.password || "").toString(),
+            rolle: rolle
+        };
     });
-} else {
-    users[adminIndex].username = "Salva";
-    users[adminIndex].password = "1307";
-    users[adminIndex].rolle = "admin";
-}
 
-localStorage.setItem("users", JSON.stringify(users));
-localStorage.setItem("produkte", JSON.stringify(produkte));
+    const adminIndex = users.findIndex(u => u.rolle === "admin");
 
-if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY") {
-    emailjs.init({
-        publicKey: EMAILJS_PUBLIC_KEY
-    });
-}
-
-function login() {
-    const user = document.getElementById("loginUser").value.trim();
-    const pass = document.getElementById("loginPass").value.trim();
-
-    const gefunden = users.find(u => u.username === user && u.password === pass);
-    if (!gefunden) {
-        alert("Falsche Daten");
-        return;
-    }
-
-    aktuellerUser = gefunden;
-
-    document.getElementById("loginBereich").classList.add("hidden");
-    document.getElementById("loginBereich").style.display = "none";
-    document.getElementById("mainBereich").classList.remove("hidden");
-    document.getElementById("header").classList.remove("hidden");
-
-    document.getElementById("userInfo").innerText =
-        `${aktuellerUser.username} (${aktuellerUser.rolle.toUpperCase()})`;
-
-    if (aktuellerUser.rolle === "admin") {
-        document.getElementById("adminBereich").classList.remove("hidden");
-        document.getElementById("verwaltungsSpalte").style.display = "";
-        document.getElementById("addBtn").style.display = "";
-        document.getElementById("produktFormTitel").style.display = "";
-        document.getElementById("name").style.display = "";
-        document.getElementById("kategorie").style.display = "";
-        document.getElementById("menge").style.display = "";
-        document.getElementById("mindestmenge").style.display = "";
-        document.getElementById("lieferantenHomepage").style.display = "";
-        userAnzeigen();
-        historieAnzeigen();
-        statistikAnzeigen();
+    if (adminIndex === -1) {
+        users.unshift({
+            username: "Salva",
+            password: "1307",
+            rolle: "admin"
+        });
     } else {
-        document.getElementById("adminBereich").classList.add("hidden");
-        document.getElementById("verwaltungsSpalte").style.display = "none";
-        document.getElementById("addBtn").style.display = "none";
-        document.getElementById("produktFormTitel").style.display = "none";
-        document.getElementById("name").style.display = "none";
-        document.getElementById("kategorie").style.display = "none";
-        document.getElementById("menge").style.display = "none";
-        document.getElementById("mindestmenge").style.display = "none";
-        document.getElementById("lieferantenHomepage").style.display = "none";
-        document.getElementById("cancelEditBtn").style.display = "none";
+        users[adminIndex].username = "Salva";
+        users[adminIndex].password = "1307";
+        users[adminIndex].rolle = "admin";
     }
-
-    bereinigeWarenkorb();
-    produkteAnzeigen();
-    warenkorbAnzeigen();
 }
 
-function logout() {
-    aktuellerUser = null;
-    location.reload();
+async function ladeDatenAusFirebase() {
+    try {
+        const doc = await appDoc.get();
+
+        if (doc.exists) {
+            const data = doc.data();
+            produkte = data.produkte || [];
+            entnahmen = data.entnahmen || [];
+            users = data.users || [];
+            warenkorb = data.warenkorb || [];
+        } else {
+            produkte = [];
+            entnahmen = [];
+            users = [];
+            warenkorb = [];
+        }
+
+        datenNormalisieren();
+        await speichern();
+        datenGeladen = true;
+        console.log("Daten aus Firebase geladen.");
+    } catch (error) {
+        console.error("Fehler beim Laden aus Firebase:", error);
+        alert("Firebase-Daten konnten nicht geladen werden.");
+    }
 }
 
-function speichern() {
-    localStorage.setItem("produkte", JSON.stringify(produkte));
-    localStorage.setItem("entnahmen", JSON.stringify(entnahmen));
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("warenkorb", JSON.stringify(warenkorb));
+async function speichern() {
+    datenNormalisieren();
+
+    try {
+        await appDoc.set({
+            produkte: produkte,
+            entnahmen: entnahmen,
+            users: users,
+            warenkorb: warenkorb
+        });
+    } catch (error) {
+        console.error("Fehler beim Speichern in Firebase:", error);
+        alert("Daten konnten nicht in Firebase gespeichert werden.");
+    }
 }
 
 function formLeeren() {
@@ -633,6 +622,67 @@ function testEmailSenden() {
             console.error("Testmail fehlgeschlagen:", error);
             alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
         });
+}
+
+function login() {
+    if (!datenGeladen) {
+        alert("Die Daten werden noch geladen. Bitte kurz warten.");
+        return;
+    }
+
+    const user = document.getElementById("loginUser").value.trim();
+    const pass = document.getElementById("loginPass").value.trim();
+
+    const gefunden = users.find(u => u.username === user && u.password === pass);
+    if (!gefunden) {
+        alert("Falsche Daten");
+        return;
+    }
+
+    aktuellerUser = gefunden;
+
+    document.getElementById("loginBereich").classList.add("hidden");
+    document.getElementById("loginBereich").style.display = "none";
+    document.getElementById("mainBereich").classList.remove("hidden");
+    document.getElementById("header").classList.remove("hidden");
+
+    document.getElementById("userInfo").innerText =
+        `${aktuellerUser.username} (${aktuellerUser.rolle.toUpperCase()})`;
+
+    if (aktuellerUser.rolle === "admin") {
+        document.getElementById("adminBereich").classList.remove("hidden");
+        document.getElementById("verwaltungsSpalte").style.display = "";
+        document.getElementById("addBtn").style.display = "";
+        document.getElementById("produktFormTitel").style.display = "";
+        document.getElementById("name").style.display = "";
+        document.getElementById("kategorie").style.display = "";
+        document.getElementById("menge").style.display = "";
+        document.getElementById("mindestmenge").style.display = "";
+        document.getElementById("lieferantenHomepage").style.display = "";
+        userAnzeigen();
+        historieAnzeigen();
+        statistikAnzeigen();
+    } else {
+        document.getElementById("adminBereich").classList.add("hidden");
+        document.getElementById("verwaltungsSpalte").style.display = "none";
+        document.getElementById("addBtn").style.display = "none";
+        document.getElementById("produktFormTitel").style.display = "none";
+        document.getElementById("name").style.display = "none";
+        document.getElementById("kategorie").style.display = "none";
+        document.getElementById("menge").style.display = "none";
+        document.getElementById("mindestmenge").style.display = "none";
+        document.getElementById("lieferantenHomepage").style.display = "none";
+        document.getElementById("cancelEditBtn").style.display = "none";
+    }
+
+    bereinigeWarenkorb();
+    produkteAnzeigen();
+    warenkorbAnzeigen();
+}
+
+function logout() {
+    aktuellerUser = null;
+    location.reload();
 }
 
 function produktSpeichern() {
@@ -1129,6 +1179,12 @@ document.getElementById("loginPass").addEventListener("keydown", function(event)
         login();
     }
 });
+
+async function appStart() {
+    await ladeDatenAusFirebase();
+}
+
+appStart();
 </script>
 
 </body>
