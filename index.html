@@ -1004,8 +1004,7 @@ function warenkorbAuschecken() {
         });
 
         const mindestbestandNeuUnterschritten =
-            alterBestand > produkt.mindestmenge &&
-            produkt.menge <= produkt.mindestmenge;
+    produkt.menge <= produkt.mindestmenge;
 
         if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
             emailBenachrichtigungen.push({
