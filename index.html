@@ -55,7 +55,6 @@ body {
     background: white;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    box-sizing: border-box;
 }
 
 input, button, select {
@@ -184,13 +183,7 @@ th {
     color: #333;
 }
 
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-/* Login */
+/* Login zentral */
 #loginBereich {
     min-height: 80vh;
     display: flex;
@@ -206,7 +199,6 @@ th {
     border-radius: 10px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     text-align: center;
-    box-sizing: border-box;
 }
 
 .login-logo {
@@ -244,7 +236,7 @@ th {
     font-size: 16px;
 }
 
-/* Produktformular */
+/* Produktformular links untereinander */
 .produkt-form {
     display: flex;
     flex-direction: column;
@@ -260,35 +252,12 @@ th {
     margin: 0;
 }
 
-.desktop-product-name {
-    display: block;
-}
-
-.mobile-product-summary {
-    display: none;
-}
-
-.mobile-product-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.mobile-toggle-btn {
-    white-space: nowrap;
-}
-
-/* MOBILE */
 @media (max-width: 900px) {
-    body {
-        font-size: 14px;
-    }
-
     .header {
         flex-direction: column;
         gap: 10px;
-        padding: 20px 16px;
-        min-height: auto;
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
 
     .header-center {
@@ -300,163 +269,6 @@ th {
     .header-left,
     .header-right {
         text-align: center;
-    }
-
-    .header-logo {
-        width: 70px;
-    }
-
-    .container {
-        margin: 16px 8px;
-        padding: 12px;
-        width: calc(100% - 16px);
-    }
-
-    .info-box,
-    .cart-box {
-        padding: 10px;
-    }
-
-    input, button, select {
-        font-size: 14px;
-        padding: 10px;
-        margin: 4px 0;
-    }
-
-    .action-btn {
-        width: 100%;
-        margin: 4px 0;
-        padding: 8px 10px;
-        font-size: 13px;
-    }
-
-    .bulk-cart-btn,
-    .checkout-btn,
-    .mail-btn {
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .status-badge {
-        font-size: 11px;
-        padding: 5px 8px;
-    }
-
-    .login-box {
-        margin: 10px;
-        padding: 25px 20px;
-    }
-
-    .login-box h1 {
-        font-size: 26px;
-    }
-
-    .login-box h2 {
-        font-size: 20px;
-    }
-
-    .produkt-form {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .produkt-form input,
-    .produkt-form button {
-        width: 100%;
-    }
-
-    /* Tabellen werden zu Karten */
-    .mobile-card-table {
-        border: 0;
-        margin-top: 12px;
-    }
-
-    .mobile-card-table thead {
-        display: none;
-    }
-
-    .mobile-card-table,
-    .mobile-card-table tbody,
-    .mobile-card-table tr,
-    .mobile-card-table td {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .mobile-card-table tr {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 12px;
-    }
-
-    .mobile-card-table tr.low-stock {
-        background: #ffebeb;
-        border-color: #e0a0a0;
-    }
-
-    .mobile-card-table td {
-        border: none;
-        border-bottom: 1px solid #eee;
-        text-align: left;
-        padding: 8px 0;
-    }
-
-    .mobile-card-table td:last-child {
-        border-bottom: none;
-    }
-
-    .mobile-card-table td::before {
-        content: attr(data-label);
-        display: block;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 4px;
-    }
-
-    .mobile-card-table td input[type="number"] {
-        width: 100%;
-        max-width: none;
-        box-sizing: border-box;
-    }
-
-    .table-wrapper {
-        overflow-x: visible;
-    }
-
-    /* MOBILE Akkordeon nur für die Produktliste */
-    #produktListe .desktop-product-name {
-        display: none;
-    }
-
-    #produktListe .mobile-product-summary {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-    }
-
-    #produktListe tr.product-row:not(.expanded) td:not(:first-child) {
-        display: none;
-    }
-
-    #produktListe tr.product-row.expanded td {
-        display: block;
-    }
-
-    #produktListe tr.product-row.expanded td:first-child {
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-        margin-bottom: 4px;
-    }
-
-    #produktListe .mobile-toggle-btn {
-        width: auto;
-        margin: 0;
-        padding: 8px 12px;
-        font-size: 13px;
     }
 }
 </style>
@@ -524,18 +336,16 @@ th {
             <input type="password" id="neuPass" placeholder="Passwort">
             <button onclick="artistHinzufuegen()">Hinzufügen</button>
 
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Benutzer</th>
-                            <th>Rolle</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Benutzer</th>
+                        <th>Rolle</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="userTabelle"></tbody>
+            </table>
 
             <hr>
 
@@ -549,75 +359,67 @@ th {
 
             <h3>Entnahme Historie</h3>
             <button onclick="excelExport()">Historie als Excel exportieren</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>ARTIST</th>
-                            <th>Produkt</th>
-                            <th>Menge</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historieTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>ARTIST</th>
+                        <th>Produkt</th>
+                        <th>Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="historieTabelle"></tbody>
+            </table>
 
             <hr>
 
             <h3>ARTIST Statistik</h3>
             <button class="delete-btn" onclick="statistikZuruecksetzen()">Statistik zurücksetzen</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>ARTIST</th>
-                            <th>Gesamt entnommene Menge</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statistikTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ARTIST</th>
+                        <th>Gesamt entnommene Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="statistikTabelle"></tbody>
+            </table>
         </div>
 
         <hr>
 
-        <div class="table-wrapper">
-            <table id="produktListe" class="mobile-card-table">
-                <thead>
-                    <tr>
-                        <th>Produkt</th>
-                        <th>Kategorie</th>
-                        <th>Bestand</th>
-                        <th>Mindestmenge</th>
-                        <th>Lieferant</th>
-                        <th>Status</th>
-                        <th>Menge</th>
-                        <th id="verwaltungsSpalte">Verwaltung</th>
-                    </tr>
-                </thead>
-                <tbody id="produktTabelle"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Kategorie</th>
+                    <th>Bestand</th>
+                    <th>Mindestmenge</th>
+                    <th>Lieferant</th>
+                    <th>Status</th>
+                    <th>Menge</th>
+                    <th id="verwaltungsSpalte">Verwaltung</th>
+                </tr>
+            </thead>
+            <tbody id="produktTabelle"></tbody>
+        </table>
 
         <button class="bulk-cart-btn" onclick="alleEingabenInWarenkorb()">Ausgewählte Mengen in den Warenkorb</button>
 
         <div class="cart-box">
             <h3>Warenkorb</h3>
             <button class="checkout-btn" onclick="warenkorbAuschecken()">Warenkorb komplett auschecken</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Produkt</th>
-                            <th>Kategorie</th>
-                            <th>Menge</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="warenkorbTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategorie</th>
+                        <th>Menge</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="warenkorbTabelle"></tbody>
+            </table>
         </div>
 
     </div>
@@ -637,6 +439,7 @@ let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
 let aktuellerUser = null;
 let bearbeiteIndex = -1;
 
+/* Produkt-IDs + Nachbestellstatus sicherstellen */
 produkte = produkte.map(p => ({
     id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
     name: p.name || "",
@@ -941,20 +744,6 @@ function produktSpeichern() {
     bearbeitungAbbrechen();
 }
 
-function toggleProduktDetails(produktId, event) {
-    if (event) event.stopPropagation();
-
-    const zeile = document.getElementById("produkt-row-" + produktId);
-    if (!zeile) return;
-
-    zeile.classList.toggle("expanded");
-
-    const btn = zeile.querySelector(".mobile-toggle-btn");
-    if (btn) {
-        btn.innerText = zeile.classList.contains("expanded") ? "Weniger" : "Details";
-    }
-}
-
 function produkteAnzeigen() {
     const tabelle = document.getElementById("produktTabelle");
     tabelle.innerHTML = "";
@@ -1016,32 +805,17 @@ function produkteAnzeigen() {
             : ``;
 
         tabelle.innerHTML += `
-            <tr id="produkt-row-${p.id}" class="product-row ${istNiedrig ? 'low-stock' : ''}">
-                <td data-label="Produkt">
-                    <div class="desktop-product-name">${p.name}</div>
-
-                    <div class="mobile-product-summary">
-                        <div class="mobile-product-meta">
-                            <strong>${p.name}</strong>
-                            <span>Bestand: ${p.menge}</span>
-                        </div>
-                        <button
-                            type="button"
-                            class="action-btn edit-btn mobile-toggle-btn"
-                            onclick="toggleProduktDetails('${p.id}', event)">
-                            Details
-                        </button>
-                    </div>
-                </td>
-                <td data-label="Kategorie">${p.kategorie}</td>
-                <td data-label="Bestand">${p.menge}</td>
-                <td data-label="Mindestmenge">${p.mindestmenge}</td>
-                <td data-label="Lieferant">${linkHTML}</td>
-                <td data-label="Status">${statusHTML}</td>
-                <td data-label="Menge">
+            <tr class="${istNiedrig ? 'low-stock' : ''}">
+                <td>${p.name}</td>
+                <td>${p.kategorie}</td>
+                <td>${p.menge}</td>
+                <td>${p.mindestmenge}</td>
+                <td>${linkHTML}</td>
+                <td>${statusHTML}</td>
+                <td>
                     <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
                 </td>
-                <td data-label="Verwaltung" ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
+                <td ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
                     ${verwaltungHTML}
                 </td>
             </tr>
@@ -1051,7 +825,7 @@ function produkteAnzeigen() {
     if (gefilterteProdukte.length === 0) {
         tabelle.innerHTML = `
             <tr>
-                <td data-label="Info" colspan="${aktuellerUser?.rolle === "admin" ? 8 : 7}">Keine Produkte gefunden.</td>
+                <td colspan="${aktuellerUser?.rolle === "admin" ? 8 : 7}">Keine Produkte gefunden.</td>
             </tr>
         `;
     }
@@ -1207,7 +981,7 @@ function warenkorbAnzeigen() {
     if (warenkorb.length === 0) {
         tabelle.innerHTML = `
             <tr>
-                <td data-label="Info" colspan="4">Warenkorb ist leer.</td>
+                <td colspan="4">Warenkorb ist leer.</td>
             </tr>
         `;
         return;
@@ -1216,11 +990,11 @@ function warenkorbAnzeigen() {
     warenkorb.forEach((eintrag, index) => {
         tabelle.innerHTML += `
             <tr>
-                <td data-label="Produkt">${eintrag.name}</td>
-                <td data-label="Kategorie">${eintrag.kategorie}</td>
-                <td data-label="Menge">${eintrag.menge}</td>
-                <td data-label="Aktion">
-                    <button class="delete-btn action-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
+                <td>${eintrag.name}</td>
+                <td>${eintrag.kategorie}</td>
+                <td>${eintrag.menge}</td>
+                <td>
+                    <button class="delete-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
                 </td>
             </tr>
         `;
@@ -1307,21 +1081,13 @@ function historieAnzeigen() {
     [...entnahmen].reverse().slice(0, 5).forEach(e => {
         tabelle.innerHTML += `
             <tr>
-                <td data-label="Datum">${e.datum}</td>
-                <td data-label="ARTIST">${e.artist}</td>
-                <td data-label="Produkt">${e.produkt}</td>
-                <td data-label="Menge">${e.menge}</td>
+                <td>${e.datum}</td>
+                <td>${e.artist}</td>
+                <td>${e.produkt}</td>
+                <td>${e.menge}</td>
             </tr>
         `;
     });
-
-    if (entnahmen.length === 0) {
-        tabelle.innerHTML = `
-            <tr>
-                <td data-label="Info" colspan="4">Keine Historie vorhanden.</td>
-            </tr>
-        `;
-    }
 }
 
 function statistikAnzeigen() {
@@ -1339,7 +1105,7 @@ function statistikAnzeigen() {
     if (userKeys.length === 0) {
         statistikTabelle.innerHTML = `
             <tr>
-                <td data-label="Info" colspan="2">Keine Statistik vorhanden.</td>
+                <td colspan="2">Keine Statistik vorhanden.</td>
             </tr>
         `;
         return;
@@ -1348,8 +1114,8 @@ function statistikAnzeigen() {
     userKeys.forEach(user => {
         statistikTabelle.innerHTML += `
             <tr>
-                <td data-label="ARTIST">${user}</td>
-                <td data-label="Gesamt entnommene Menge">${stats[user]}</td>
+                <td>${user}</td>
+                <td>${stats[user]}</td>
             </tr>
         `;
     });
@@ -1419,23 +1185,15 @@ function userAnzeigen() {
         if (u.rolle !== "admin") {
             userTabelle.innerHTML += `
                 <tr>
-                    <td data-label="Benutzer">${u.username}</td>
-                    <td data-label="Rolle">${u.rolle.toUpperCase()}</td>
-                    <td data-label="Aktion">
-                        <button class="delete-btn action-btn" onclick="artistLoeschen(${index})">Löschen</button>
+                    <td>${u.username}</td>
+                    <td>${u.rolle.toUpperCase()}</td>
+                    <td>
+                        <button class="delete-btn" onclick="artistLoeschen(${index})">Löschen</button>
                     </td>
                 </tr>
             `;
         }
     });
-
-    if (users.filter(u => u.rolle !== "admin").length === 0) {
-        userTabelle.innerHTML = `
-            <tr>
-                <td data-label="Info" colspan="3">Keine ARTISTS vorhanden.</td>
-            </tr>
-        `;
-    }
 }
 
 function artistLoeschen(index) {
