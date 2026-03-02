@@ -1,12 +1,20 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ART AGUJA INVENTORY SYSTEM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ART AGUJA INVENTORY</title>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="ART AGUJA INVENTORY">
+</head>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore-compat.js"></script>
 
 <style>
 body {
@@ -55,7 +63,6 @@ body {
     background: white;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    box-sizing: border-box;
 }
 
 input, button, select {
@@ -73,11 +80,6 @@ button {
 
 button:hover {
     opacity: 0.85;
-}
-
-button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
 }
 
 table {
@@ -127,6 +129,10 @@ th {
     background: #1b4d8a;
 }
 
+.cart-btn {
+    background: #444;
+}
+
 .checkout-btn {
     background: #0d5c2f;
 }
@@ -134,10 +140,6 @@ th {
 .bulk-cart-btn {
     background: #444;
     margin-top: 10px;
-}
-
-.order-btn {
-    background: #8a5a00;
 }
 
 .info-box {
@@ -160,37 +162,20 @@ th {
     margin-top: 20px;
 }
 
-.status-badge {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: bold;
-    white-space: nowrap;
+.password-box {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
 }
 
-.status-ordered {
-    background: #0d5c2f;
-    color: white;
-}
-
-.status-pending {
-    background: #b22222;
-    color: white;
-}
-
-.status-normal {
-    background: #ddd;
-    color: #333;
-}
-
-.table-wrapper {
+.password-box input {
+    max-width: 320px;
     width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    display: block;
 }
 
-/* Login */
 #loginBereich {
     min-height: 80vh;
     display: flex;
@@ -206,7 +191,6 @@ th {
     border-radius: 10px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     text-align: center;
-    box-sizing: border-box;
 }
 
 .login-logo {
@@ -244,7 +228,6 @@ th {
     font-size: 16px;
 }
 
-/* Produktformular */
 .produkt-form {
     display: flex;
     flex-direction: column;
@@ -260,17 +243,17 @@ th {
     margin: 0;
 }
 
-/* MOBILE */
-@media (max-width: 900px) {
-    body {
-        font-size: 14px;
-    }
+.admin-user-input {
+    width: 170px;
+    margin: 0;
+}
 
+@media (max-width: 900px) {
     .header {
         flex-direction: column;
         gap: 10px;
-        padding: 20px 16px;
-        min-height: auto;
+        padding-top: 20px;
+        padding-bottom: 20px;
     }
 
     .header-center {
@@ -282,130 +265,6 @@ th {
     .header-left,
     .header-right {
         text-align: center;
-    }
-
-    .header-logo {
-        width: 70px;
-    }
-
-    .container {
-        margin: 16px 8px;
-        padding: 12px;
-        width: calc(100% - 16px);
-    }
-
-    .info-box,
-    .cart-box {
-        padding: 10px;
-    }
-
-    input, button, select {
-        font-size: 14px;
-        padding: 10px;
-        margin: 4px 0;
-    }
-
-    .action-btn {
-        width: 100%;
-        margin: 4px 0;
-        padding: 8px 10px;
-        font-size: 13px;
-    }
-
-    .bulk-cart-btn,
-    .checkout-btn,
-    .mail-btn {
-        width: 100%;
-        margin-top: 10px;
-    }
-
-    .status-badge {
-        font-size: 11px;
-        padding: 5px 8px;
-    }
-
-    .login-box {
-        margin: 10px;
-        padding: 25px 20px;
-    }
-
-    .login-box h1 {
-        font-size: 26px;
-    }
-
-    .login-box h2 {
-        font-size: 20px;
-    }
-
-    .produkt-form {
-        max-width: 100%;
-        width: 100%;
-    }
-
-    .produkt-form input,
-    .produkt-form button {
-        width: 100%;
-    }
-
-    /* Tabellen werden zu Karten */
-    .mobile-card-table {
-        border: 0;
-        margin-top: 12px;
-    }
-
-    .mobile-card-table thead {
-        display: none;
-    }
-
-    .mobile-card-table,
-    .mobile-card-table tbody,
-    .mobile-card-table tr,
-    .mobile-card-table td {
-        display: block;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .mobile-card-table tr {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        padding: 10px;
-        margin-bottom: 12px;
-    }
-
-    .mobile-card-table tr.low-stock {
-        background: #ffebeb;
-        border-color: #e0a0a0;
-    }
-
-    .mobile-card-table td {
-        border: none;
-        border-bottom: 1px solid #eee;
-        text-align: left;
-        padding: 8px 0;
-    }
-
-    .mobile-card-table td:last-child {
-        border-bottom: none;
-    }
-
-    .mobile-card-table td::before {
-        content: attr(data-label);
-        display: block;
-        font-weight: bold;
-        color: #333;
-        margin-bottom: 4px;
-    }
-
-    .mobile-card-table td input[type="number"] {
-        width: 100%;
-        max-width: none;
-        box-sizing: border-box;
-    }
-
-    .table-wrapper {
-        overflow-x: visible;
     }
 }
 </style>
@@ -440,6 +299,19 @@ th {
 
     <div id="mainBereich" class="hidden">
 
+        <div class="password-box">
+            <h3>Mein Passwort ändern</h3>
+            <input type="password" id="eigenesAktuellesPasswort" placeholder="Aktuelles Passwort">
+            <input type="password" id="eigenesNeuesPasswort" placeholder="Neues Passwort">
+            <input type="password" id="eigenesNeuesPasswortWiederholen" placeholder="Neues Passwort wiederholen">
+            <button onclick="eigenesPasswortAendern()">Eigenes Passwort ändern</button>
+            <div class="small-note">
+                Jeder Benutzer kann hier sein eigenes Passwort ändern.
+            </div>
+        </div>
+
+        <hr>
+
         <h3 id="produktFormTitel">Produkt hinzufügen</h3>
         <div class="produkt-form">
             <input type="text" id="name" placeholder="Produktname">
@@ -473,100 +345,90 @@ th {
             <input type="password" id="neuPass" placeholder="Passwort">
             <button onclick="artistHinzufuegen()">Hinzufügen</button>
 
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Benutzer</th>
-                            <th>Rolle</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Benutzer</th>
+                        <th>Rolle</th>
+                        <th>Neues Passwort</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="userTabelle"></tbody>
+            </table>
 
             <hr>
 
             <h3>E-Mail Benachrichtigung</h3>
             <button class="mail-btn" onclick="testEmailSenden()">Testmail senden</button>
             <div class="small-note">
-                Trage im Code deinen Public Key, Service ID und Template ID von EmailJS ein.
+                Public Key, Service ID und Template ID sind im Code eingetragen.
             </div>
 
             <hr>
 
             <h3>Entnahme Historie</h3>
             <button onclick="excelExport()">Historie als Excel exportieren</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Datum</th>
-                            <th>ARTIST</th>
-                            <th>Produkt</th>
-                            <th>Menge</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historieTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>ARTIST</th>
+                        <th>Produkt</th>
+                        <th>Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="historieTabelle"></tbody>
+            </table>
 
             <hr>
 
             <h3>ARTIST Statistik</h3>
             <button class="delete-btn" onclick="statistikZuruecksetzen()">Statistik zurücksetzen</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>ARTIST</th>
-                            <th>Gesamt entnommene Menge</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statistikTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ARTIST</th>
+                        <th>Gesamt entnommene Menge</th>
+                    </tr>
+                </thead>
+                <tbody id="statistikTabelle"></tbody>
+            </table>
         </div>
 
         <hr>
 
-        <div class="table-wrapper">
-            <table class="mobile-card-table">
-                <thead>
-                    <tr>
-                        <th>Produkt</th>
-                        <th>Kategorie</th>
-                        <th>Bestand</th>
-                        <th>Mindestmenge</th>
-                        <th>Lieferant</th>
-                        <th>Status</th>
-                        <th>Menge</th>
-                        <th id="verwaltungsSpalte">Verwaltung</th>
-                    </tr>
-                </thead>
-                <tbody id="produktTabelle"></tbody>
-            </table>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Kategorie</th>
+                    <th>Bestand</th>
+                    <th>Mindestmenge</th>
+                    <th>Lieferant</th>
+                    <th>Menge</th>
+                    <th id="verwaltungsSpalte">Verwaltung</th>
+                </tr>
+            </thead>
+            <tbody id="produktTabelle"></tbody>
+        </table>
 
         <button class="bulk-cart-btn" onclick="alleEingabenInWarenkorb()">Ausgewählte Mengen in den Warenkorb</button>
 
         <div class="cart-box">
             <h3>Warenkorb</h3>
             <button class="checkout-btn" onclick="warenkorbAuschecken()">Warenkorb komplett auschecken</button>
-            <div class="table-wrapper">
-                <table class="mobile-card-table">
-                    <thead>
-                        <tr>
-                            <th>Produkt</th>
-                            <th>Kategorie</th>
-                            <th>Menge</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="warenkorbTabelle"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategorie</th>
+                        <th>Menge</th>
+                        <th>Aktion</th>
+                    </tr>
+                </thead>
+                <tbody id="warenkorbTabelle"></tbody>
+            </table>
         </div>
 
     </div>
@@ -578,67 +440,246 @@ const EMAILJS_SERVICE_ID = "service_qy3c5ul";
 const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
 const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
 
-let produkte = JSON.parse(localStorage.getItem("produkte")) || [];
-let entnahmen = JSON.parse(localStorage.getItem("entnahmen")) || [];
-let users = JSON.parse(localStorage.getItem("users")) || [];
-let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
-
-let aktuellerUser = null;
-let bearbeiteIndex = -1;
-
-produkte = produkte.map(p => ({
-    id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
-    name: p.name || "",
-    kategorie: p.kategorie || "",
-    menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
-    mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
-    lieferantenHomepage: p.lieferantenHomepage || "",
-    nachbestellt: !!p.nachbestellt
-}));
-
-if (!Array.isArray(users)) {
-    users = [];
-}
-
-users = users.map(u => {
-    let rolle = (u.rolle || "").toString().toLowerCase().trim();
-
-    if (rolle === "mitarbeiter") rolle = "artist";
-    if (rolle !== "admin" && rolle !== "artist") {
-        rolle = "artist";
-    }
-
-    return {
-        username: (u.username || "").toString(),
-        password: (u.password || "").toString(),
-        rolle: rolle
-    };
-});
-
-const adminIndex = users.findIndex(u => u.rolle === "admin");
-
-if (adminIndex === -1) {
-    users.unshift({
-        username: "Salva",
-        password: "1307",
-        rolle: "admin"
-    });
-} else {
-    users[adminIndex].username = "Salva";
-    users[adminIndex].password = "1307";
-    users[adminIndex].rolle = "admin";
-}
-
-localStorage.setItem("users", JSON.stringify(users));
-localStorage.setItem("produkte", JSON.stringify(produkte));
-
-if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY") {
+if (typeof emailjs !== "undefined") {
     emailjs.init({
         publicKey: EMAILJS_PUBLIC_KEY
     });
 }
 
+const firebaseConfig = {
+    apiKey: "AIzaSyBYwbDcLCJk53mdy8XtQTYAJ2OrlsDuzqk",
+    authDomain: "inventory-db037.firebaseapp.com",
+    projectId: "inventory-db037",
+    storageBucket: "inventory-db037.firebasestorage.app",
+    messagingSenderId: "511415225217",
+    appId: "1:511415225217:web:f08b9e7007d0a19184b680"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const appDoc = db.collection("app").doc("inventoryData");
+
+let produkte = [];
+let entnahmen = [];
+let users = [];
+let warenkorb = [];
+
+let aktuellerUser = null;
+let bearbeiteIndex = -1;
+let datenGeladen = false;
+
+function datenNormalisieren() {
+    produkte = Array.isArray(produkte) ? produkte : [];
+    entnahmen = Array.isArray(entnahmen) ? entnahmen : [];
+    users = Array.isArray(users) ? users : [];
+    warenkorb = Array.isArray(warenkorb) ? warenkorb : [];
+
+    produkte = produkte.map(p => ({
+        id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+        name: p.name || "",
+        kategorie: p.kategorie || "",
+        menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
+        mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
+        lieferantenHomepage: p.lieferantenHomepage || ""
+    }));
+
+    users = users.map(u => {
+        let rolle = (u.rolle || "").toString().toLowerCase().trim();
+
+        if (rolle === "mitarbeiter") rolle = "artist";
+        if (rolle !== "admin" && rolle !== "artist") {
+            rolle = "artist";
+        }
+
+        return {
+            username: (u.username || "").toString(),
+            password: (u.password || "").toString(),
+            rolle: rolle
+        };
+    });
+
+    const adminIndex = users.findIndex(u => u.rolle === "admin");
+
+    if (adminIndex === -1) {
+        users.unshift({
+            username: "Salva",
+            password: "1307",
+            rolle: "admin"
+        });
+    } else {
+        users[adminIndex].username = "Salva";
+        users[adminIndex].password = "1307";
+        users[adminIndex].rolle = "admin";
+    }
+}
+
+async function ladeDatenAusFirebase() {
+    try {
+        const doc = await appDoc.get();
+
+        if (doc.exists) {
+            const data = doc.data();
+            produkte = data.produkte || [];
+            entnahmen = data.entnahmen || [];
+            users = data.users || [];
+            warenkorb = data.warenkorb || [];
+        } else {
+            produkte = [];
+            entnahmen = [];
+            users = [];
+            warenkorb = [];
+        }
+
+        datenNormalisieren();
+        await speichern();
+        datenGeladen = true;
+        console.log("Daten aus Firebase geladen.");
+    } catch (error) {
+        console.error("Fehler beim Laden aus Firebase:", error);
+        alert("Firebase-Daten konnten nicht geladen werden.");
+    }
+}
+
+async function speichern() {
+    datenNormalisieren();
+
+    try {
+        await appDoc.set({
+            produkte: produkte,
+            entnahmen: entnahmen,
+            users: users,
+            warenkorb: warenkorb
+        });
+    } catch (error) {
+        console.error("Fehler beim Speichern in Firebase:", error);
+        alert("Daten konnten nicht in Firebase gespeichert werden.");
+    }
+}
+
+function formLeeren() {
+    document.getElementById("name").value = "";
+    document.getElementById("kategorie").value = "";
+    document.getElementById("menge").value = "";
+    document.getElementById("mindestmenge").value = "";
+    document.getElementById("lieferantenHomepage").value = "";
+}
+
+function sichereURL(url) {
+    if (!url) return "";
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return "https://" + url;
+    }
+    return url;
+}
+
+function datumDeutsch() {
+    return new Date().toLocaleString("de-DE");
+}
+
+function istGleichesProdukt(a, b) {
+    return a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
+           a.kategorie.trim().toLowerCase() === b.kategorie.trim().toLowerCase();
+}
+
+function emailIstKonfiguriert() {
+    return EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY" &&
+           EMAILJS_SERVICE_ID !== "DEIN_SERVICE_ID" &&
+           EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
+}
+
+function getProduktById(id) {
+    return produkte.find(p => p.id === id);
+}
+
+function berechneMengeImWarenkorb(produktId) {
+    return warenkorb
+        .filter(w => w.produktId === produktId)
+        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
+}
+
+function bereinigeWarenkorb() {
+    warenkorb = warenkorb.filter(w => {
+        const produkt = getProduktById(w.produktId);
+        return !!produkt;
+    });
+    speichern();
+}
+
+function safeInputId(text) {
+    return String(text).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function sendeMindestbestandEmail(produkt, entnommeneMenge) {
+    if (!emailIstKonfiguriert()) {
+        console.warn("EmailJS ist noch nicht konfiguriert.");
+        return Promise.reject("EmailJS nicht konfiguriert");
+    }
+
+    const templateParams = {
+        to_email: BENACHRICHTIGUNGS_EMAIL,
+        produkt_name: produkt.name,
+        kategorie: produkt.kategorie,
+        lieferant: produkt.lieferantenHomepage || "-",
+        aktueller_bestand: produkt.menge,
+        mindestbestand: produkt.mindestmenge,
+        entnommene_menge: entnommeneMenge,
+        artist: aktuellerUser ? aktuellerUser.username : "System",
+        zeitpunkt: datumDeutsch(),
+        nachricht:
+`Der Mindestbestand wurde unterschritten.
+
+Produkt: ${produkt.name}
+Kategorie: ${produkt.kategorie}
+Lieferant: ${produkt.lieferantenHomepage || "-"}
+Aktueller Bestand: ${produkt.menge}
+Mindestbestand: ${produkt.mindestmenge}
+Entnommene Menge: ${entnommeneMenge}
+ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
+Zeitpunkt: ${datumDeutsch()}`
+    };
+
+    return emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        {
+            publicKey: EMAILJS_PUBLIC_KEY
+        }
+    );
+}
+
+function testEmailSenden() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    if (!emailIstKonfiguriert()) {
+        alert("Bitte zuerst EmailJS konfigurieren: Public Key, Service ID und Template ID eintragen.");
+        return;
+    }
+
+    const testProdukt = {
+        name: "Testprodukt",
+        kategorie: "Testkategorie",
+        menge: 1,
+        mindestmenge: 3,
+        lieferantenHomepage: "-"
+    };
+
+    sendeMindestbestandEmail(testProdukt, 1)
+        .then(() => {
+            alert("Testmail wurde versendet.");
+        })
+        .catch((error) => {
+            console.error("Testmail fehlgeschlagen:", error);
+            alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
+        });
+}
+
 function login() {
+    if (!datenGeladen) {
+        alert("Die Daten werden noch geladen. Bitte kurz warten.");
+        return;
+    }
+
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value.trim();
 
@@ -694,122 +735,77 @@ function logout() {
     location.reload();
 }
 
-function speichern() {
-    localStorage.setItem("produkte", JSON.stringify(produkte));
-    localStorage.setItem("entnahmen", JSON.stringify(entnahmen));
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("warenkorb", JSON.stringify(warenkorb));
-}
+function eigenesPasswortAendern() {
+    if (!aktuellerUser) return;
 
-function formLeeren() {
-    document.getElementById("name").value = "";
-    document.getElementById("kategorie").value = "";
-    document.getElementById("menge").value = "";
-    document.getElementById("mindestmenge").value = "";
-    document.getElementById("lieferantenHomepage").value = "";
-}
+    const aktuellesPasswort = document.getElementById("eigenesAktuellesPasswort").value.trim();
+    const neuesPasswort = document.getElementById("eigenesNeuesPasswort").value.trim();
+    const neuesPasswortWiederholen = document.getElementById("eigenesNeuesPasswortWiederholen").value.trim();
 
-function sichereURL(url) {
-    if (!url) return "";
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        return "https://" + url;
-    }
-    return url;
-}
-
-function datumDeutsch() {
-    return new Date().toLocaleString("de-DE");
-}
-
-function istGleichesProdukt(a, b) {
-    return a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
-           a.kategorie.trim().toLowerCase() === b.kategorie.trim().toLowerCase();
-}
-
-function emailIstKonfiguriert() {
-    return EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY" &&
-           EMAILJS_SERVICE_ID !== "DEIN_SERVICE_ID" &&
-           EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
-}
-
-function getProduktById(id) {
-    return produkte.find(p => p.id === id);
-}
-
-function berechneMengeImWarenkorb(produktId) {
-    return warenkorb
-        .filter(w => w.produktId === produktId)
-        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
-}
-
-function bereinigeWarenkorb() {
-    warenkorb = warenkorb.filter(w => {
-        const produkt = getProduktById(w.produktId);
-        return !!produkt;
-    });
-    speichern();
-}
-
-function sendeMindestbestandEmail(produkt, entnommeneMenge) {
-    if (!emailIstKonfiguriert()) {
-        console.warn("EmailJS ist noch nicht konfiguriert.");
-        return Promise.reject("EmailJS nicht konfiguriert");
-    }
-
-    const templateParams = {
-        to_email: BENACHRICHTIGUNGS_EMAIL,
-        produkt_name: produkt.name,
-        kategorie: produkt.kategorie,
-        lieferant: produkt.lieferantenHomepage,
-        aktueller_bestand: produkt.menge,
-        mindestbestand: produkt.mindestmenge,
-        entnommene_menge: entnommeneMenge,
-        artist: aktuellerUser ? aktuellerUser.username : "System",
-        zeitpunkt: datumDeutsch(),
-        nachricht:
-`Der Mindestbestand wurde unterschritten.
-
-Produkt: ${produkt.name}
-Kategorie: ${produkt.kategorie}
-Lieferant: ${produkt.lieferantenHomepage}
-Aktueller Bestand: ${produkt.menge}
-Mindestbestand: ${produkt.mindestmenge}
-Entnommene Menge: ${entnommeneMenge}
-ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
-Zeitpunkt: ${datumDeutsch()}`
-    };
-
-    return emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams
-    );
-}
-
-function testEmailSenden() {
-    if (aktuellerUser?.rolle !== "admin") return;
-
-    if (!emailIstKonfiguriert()) {
-        alert("Bitte zuerst EmailJS konfigurieren: Public Key, Service ID und Template ID eintragen.");
+    if (!aktuellesPasswort || !neuesPasswort || !neuesPasswortWiederholen) {
+        alert("Bitte alle Passwortfelder ausfüllen.");
         return;
     }
 
-    const testProdukt = {
-        name: "Testprodukt",
-        kategorie: "Testkategorie",
-        menge: 1,
-        mindestmenge: 3,
-        lieferantenHomepage: "-"
-    };
+    if (aktuellesPasswort !== aktuellerUser.password) {
+        alert("Das aktuelle Passwort ist falsch.");
+        return;
+    }
 
-    sendeMindestbestandEmail(testProdukt, 1)
-        .then(() => {
-            alert("Testmail wurde versendet.");
-        })
-        .catch((error) => {
-            console.error("Testmail fehlgeschlagen:", error);
-            alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
-        });
+    if (neuesPasswort.length < 4) {
+        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
+        return;
+    }
+
+    if (neuesPasswort !== neuesPasswortWiederholen) {
+        alert("Die neuen Passwörter stimmen nicht überein.");
+        return;
+    }
+
+    const userIndex = users.findIndex(u => u.username === aktuellerUser.username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    users[userIndex].password = neuesPasswort;
+    aktuellerUser.password = neuesPasswort;
+    speichern();
+
+    document.getElementById("eigenesAktuellesPasswort").value = "";
+    document.getElementById("eigenesNeuesPasswort").value = "";
+    document.getElementById("eigenesNeuesPasswortWiederholen").value = "";
+
+    alert("Dein Passwort wurde erfolgreich geändert.");
+}
+
+function adminPasswortAendern(username) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const feldId = "adminPasswort_" + safeInputId(username);
+    const neuesPasswort = document.getElementById(feldId).value.trim();
+
+    if (!neuesPasswort) {
+        alert("Bitte ein neues Passwort eingeben.");
+        return;
+    }
+
+    if (neuesPasswort.length < 4) {
+        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
+        return;
+    }
+
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    users[userIndex].password = neuesPasswort;
+    speichern();
+    document.getElementById(feldId).value = "";
+
+    alert(`Passwort für "${username}" wurde geändert.`);
 }
 
 function produktSpeichern() {
@@ -837,8 +833,7 @@ function produktSpeichern() {
         kategorie: produktKategorie,
         menge: produktMenge,
         mindestmenge: produktMindestmenge,
-        lieferantenHomepage: produktLieferantenHomepage,
-        nachbestellt: bearbeiteIndex === -1 ? false : !!produkte[bearbeiteIndex].nachbestellt
+        lieferantenHomepage: produktLieferantenHomepage
     };
 
     if (bearbeiteIndex === -1) {
@@ -897,7 +892,7 @@ function produkteAnzeigen() {
     const suchbegriff = document.getElementById("suche")?.value.toLowerCase() || "";
     const lagerFilter = document.getElementById("lagerFilter")?.value || "alle";
 
-    const gefilterteProdukte = produkte.filter(p => {
+    produkte.forEach((p, index) => {
         const name = (p.name || "").toLowerCase();
         const kategorie = (p.kategorie || "").toLowerCase();
 
@@ -905,76 +900,36 @@ function produkteAnzeigen() {
         const istNiedrig = p.menge <= p.mindestmenge;
         const passtFilter = lagerFilter === "alle" || (lagerFilter === "niedrig" && istNiedrig);
 
-        return passtSuche && passtFilter;
-    });
-
-    gefilterteProdukte.sort((a, b) => {
-        const aNiedrig = a.menge <= a.mindestmenge ? 0 : 1;
-        const bNiedrig = b.menge <= b.mindestmenge ? 0 : 1;
-
-        if (aNiedrig !== bNiedrig) {
-            return aNiedrig - bNiedrig;
-        }
-
-        return a.name.localeCompare(b.name, "de", { sensitivity: "base" });
-    });
-
-    gefilterteProdukte.forEach((p) => {
-        const originalIndex = produkte.findIndex(prod => prod.id === p.id);
-        const istNiedrig = p.menge <= p.mindestmenge;
+        if (!passtSuche || !passtFilter) return;
 
         const linkHTML = p.lieferantenHomepage
             ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
             : `-`;
 
-        let statusHTML = `<span class="status-badge status-normal">OK</span>`;
-
-        if (istNiedrig && p.nachbestellt) {
-            statusHTML = `<span class="status-badge status-ordered">NACHBESTELLT</span>`;
-        } else if (istNiedrig && !p.nachbestellt) {
-            statusHTML = `<span class="status-badge status-pending">NICHT NACHBESTELLT</span>`;
-        }
-
         const verwaltungHTML = aktuellerUser?.rolle === "admin"
             ? `
-                <button class="action-btn edit-btn" onclick="produktBearbeiten(${originalIndex})">Bearbeiten</button>
-                <button class="action-btn restock-btn" onclick="produktAufstocken(${originalIndex})">Aufstocken</button>
-                ${
-                    istNiedrig
-                        ? `<button class="action-btn order-btn" onclick="nachbestellStatusWechseln(${originalIndex})">
-                            ${p.nachbestellt ? 'Bestellung zurücksetzen' : 'Als nachbestellt markieren'}
-                           </button>`
-                        : `<button class="action-btn order-btn" disabled>Nicht nötig</button>`
-                }
-                <button class="action-btn delete-btn" onclick="produktLoeschen(${originalIndex})">Löschen</button>
+                <button class="action-btn edit-btn" onclick="produktBearbeiten(${index})">Bearbeiten</button>
+                <button class="action-btn restock-btn" onclick="produktAufstocken(${index})">Aufstocken</button>
+                <button class="action-btn delete-btn" onclick="produktLoeschen(${index})">Löschen</button>
               `
             : ``;
 
         tabelle.innerHTML += `
             <tr class="${istNiedrig ? 'low-stock' : ''}">
-                <td data-label="Produkt">${p.name}</td>
-                <td data-label="Kategorie">${p.kategorie}</td>
-                <td data-label="Bestand">${p.menge}</td>
-                <td data-label="Mindestmenge">${p.mindestmenge}</td>
-                <td data-label="Lieferant">${linkHTML}</td>
-                <td data-label="Status">${statusHTML}</td>
-                <td data-label="Menge">
+                <td>${p.name}</td>
+                <td>${p.kategorie}</td>
+                <td>${p.menge}</td>
+                <td>${p.mindestmenge}</td>
+                <td>${linkHTML}</td>
+                <td>
                     <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
                 </td>
-                <td data-label="Verwaltung" ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
+                <td ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
                     ${verwaltungHTML}
                 </td>
             </tr>
         `;
     });
-
-    if (gefilterteProdukte.length === 0) {
-        tabelle.innerHTML = `
-            <tr>
-                <td data-label="Info" colspan="${aktuellerUser?.rolle === "admin" ? 8 : 7}">Keine Produkte gefunden.</td>
-            </tr>
-        `;
-    }
 }
 
 function produktBearbeiten(index) {
@@ -1007,27 +962,10 @@ function produktAufstocken(index) {
     }
 
     produkte[index].menge += aufstockMenge;
-    produkte[index].nachbestellt = false;
     speichern();
     produkteAnzeigen();
 
     alert(`Bestand von "${produkte[index].name}" wurde um ${aufstockMenge} erhöht.`);
-}
-
-function nachbestellStatusWechseln(index) {
-    if (aktuellerUser?.rolle !== "admin") return;
-
-    const produkt = produkte[index];
-    if (!produkt) return;
-
-    if (produkt.menge > produkt.mindestmenge) {
-        alert("Dieses Produkt ist nicht im roten Bereich.");
-        return;
-    }
-
-    produkt.nachbestellt = !produkt.nachbestellt;
-    speichern();
-    produkteAnzeigen();
 }
 
 function bearbeitungAbbrechen() {
@@ -1127,7 +1065,7 @@ function warenkorbAnzeigen() {
     if (warenkorb.length === 0) {
         tabelle.innerHTML = `
             <tr>
-                <td data-label="Info" colspan="4">Warenkorb ist leer.</td>
+                <td colspan="4">Warenkorb ist leer.</td>
             </tr>
         `;
         return;
@@ -1136,11 +1074,11 @@ function warenkorbAnzeigen() {
     warenkorb.forEach((eintrag, index) => {
         tabelle.innerHTML += `
             <tr>
-                <td data-label="Produkt">${eintrag.name}</td>
-                <td data-label="Kategorie">${eintrag.kategorie}</td>
-                <td data-label="Menge">${eintrag.menge}</td>
-                <td data-label="Aktion">
-                    <button class="delete-btn action-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
+                <td>${eintrag.name}</td>
+                <td>${eintrag.kategorie}</td>
+                <td>${eintrag.menge}</td>
+                <td>
+                    <button class="delete-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
                 </td>
             </tr>
         `;
@@ -1177,7 +1115,6 @@ function warenkorbAuschecken() {
 
     for (let eintrag of warenkorb) {
         const produkt = getProduktById(eintrag.produktId);
-        const alterBestand = produkt.menge;
 
         produkt.menge -= eintrag.menge;
 
@@ -1189,7 +1126,6 @@ function warenkorbAuschecken() {
         });
 
         const mindestbestandNeuUnterschritten =
-            alterBestand > produkt.mindestmenge &&
             produkt.menge <= produkt.mindestmenge;
 
         if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
@@ -1212,8 +1148,12 @@ function warenkorbAuschecken() {
 
     emailBenachrichtigungen.forEach(eintrag => {
         sendeMindestbestandEmail(eintrag.produkt, eintrag.menge)
+            .then(() => {
+                console.log(`E-Mail für ${eintrag.produkt.name} erfolgreich gesendet.`);
+            })
             .catch(error => {
                 console.error("E-Mail Versand fehlgeschlagen:", error);
+                alert(`E-Mail für "${eintrag.produkt.name}" konnte nicht versendet werden. Bitte Browser-Konsole prüfen.`);
             });
     });
 
@@ -1227,21 +1167,13 @@ function historieAnzeigen() {
     [...entnahmen].reverse().slice(0, 5).forEach(e => {
         tabelle.innerHTML += `
             <tr>
-                <td data-label="Datum">${e.datum}</td>
-                <td data-label="ARTIST">${e.artist}</td>
-                <td data-label="Produkt">${e.produkt}</td>
-                <td data-label="Menge">${e.menge}</td>
+                <td>${e.datum}</td>
+                <td>${e.artist}</td>
+                <td>${e.produkt}</td>
+                <td>${e.menge}</td>
             </tr>
         `;
     });
-
-    if (entnahmen.length === 0) {
-        tabelle.innerHTML = `
-            <tr>
-                <td data-label="Info" colspan="4">Keine Historie vorhanden.</td>
-            </tr>
-        `;
-    }
 }
 
 function statistikAnzeigen() {
@@ -1259,7 +1191,7 @@ function statistikAnzeigen() {
     if (userKeys.length === 0) {
         statistikTabelle.innerHTML = `
             <tr>
-                <td data-label="Info" colspan="2">Keine Statistik vorhanden.</td>
+                <td colspan="2">Keine Statistik vorhanden.</td>
             </tr>
         `;
         return;
@@ -1268,8 +1200,8 @@ function statistikAnzeigen() {
     userKeys.forEach(user => {
         statistikTabelle.innerHTML += `
             <tr>
-                <td data-label="ARTIST">${user}</td>
-                <td data-label="Gesamt entnommene Menge">${stats[user]}</td>
+                <td>${user}</td>
+                <td>${stats[user]}</td>
             </tr>
         `;
     });
@@ -1335,36 +1267,40 @@ function userAnzeigen() {
     const userTabelle = document.getElementById("userTabelle");
     userTabelle.innerHTML = "";
 
-    users.forEach((u, index) => {
+    users.forEach((u) => {
         if (u.rolle !== "admin") {
+            const feldId = "adminPasswort_" + safeInputId(u.username);
+
             userTabelle.innerHTML += `
                 <tr>
-                    <td data-label="Benutzer">${u.username}</td>
-                    <td data-label="Rolle">${u.rolle.toUpperCase()}</td>
-                    <td data-label="Aktion">
-                        <button class="delete-btn action-btn" onclick="artistLoeschen(${index})">Löschen</button>
+                    <td>${u.username}</td>
+                    <td>${u.rolle.toUpperCase()}</td>
+                    <td>
+                        <input class="admin-user-input" type="password" id="${feldId}" placeholder="Neues Passwort">
+                    </td>
+                    <td>
+                        <button class="edit-btn" onclick="adminPasswortAendern('${u.username.replace(/'/g, "\\'")}')">Passwort ändern</button>
+                        <button class="delete-btn" onclick="artistLoeschen('${u.username.replace(/'/g, "\\'")}')">Löschen</button>
                     </td>
                 </tr>
             `;
         }
     });
-
-    if (users.filter(u => u.rolle !== "admin").length === 0) {
-        userTabelle.innerHTML = `
-            <tr>
-                <td data-label="Info" colspan="3">Keine ARTISTS vorhanden.</td>
-            </tr>
-        `;
-    }
 }
 
-function artistLoeschen(index) {
+function artistLoeschen(username) {
     if (aktuellerUser?.rolle !== "admin") return;
 
-    const bestaetigt = confirm(`ARTIST "${users[index].username}" wirklich löschen?`);
+    const userIndex = users.findIndex(u => u.username === username);
+    if (userIndex === -1) {
+        alert("Benutzer wurde nicht gefunden.");
+        return;
+    }
+
+    const bestaetigt = confirm(`ARTIST "${users[userIndex].username}" wirklich löschen?`);
     if (!bestaetigt) return;
 
-    users.splice(index, 1);
+    users.splice(userIndex, 1);
     speichern();
     userAnzeigen();
 }
@@ -1380,6 +1316,12 @@ document.getElementById("loginPass").addEventListener("keydown", function(event)
         login();
     }
 });
+
+async function appStart() {
+    await ladeDatenAusFirebase();
+}
+
+appStart();
 </script>
 
 </body>
