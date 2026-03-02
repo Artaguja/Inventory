@@ -260,6 +260,24 @@ th {
     margin: 0;
 }
 
+.desktop-product-name {
+    display: block;
+}
+
+.mobile-product-summary {
+    display: none;
+}
+
+.mobile-product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mobile-toggle-btn {
+    white-space: nowrap;
+}
+
 /* MOBILE */
 @media (max-width: 900px) {
     body {
@@ -407,6 +425,39 @@ th {
     .table-wrapper {
         overflow-x: visible;
     }
+
+    /* MOBILE Akkordeon nur für die Produktliste */
+    #produktListe .desktop-product-name {
+        display: none;
+    }
+
+    #produktListe .mobile-product-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #produktListe tr.product-row:not(.expanded) td:not(:first-child) {
+        display: none;
+    }
+
+    #produktListe tr.product-row.expanded td {
+        display: block;
+    }
+
+    #produktListe tr.product-row.expanded td:first-child {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 4px;
+    }
+
+    #produktListe .mobile-toggle-btn {
+        width: auto;
+        margin: 0;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
 }
 </style>
 </head>
@@ -532,7 +583,7 @@ th {
         <hr>
 
         <div class="table-wrapper">
-            <table class="mobile-card-table">
+            <table id="produktListe" class="mobile-card-table">
                 <thead>
                     <tr>
                         <th>Produkt</th>
@@ -890,6 +941,20 @@ function produktSpeichern() {
     bearbeitungAbbrechen();
 }
 
+function toggleProduktDetails(produktId, event) {
+    if (event) event.stopPropagation();
+
+    const zeile = document.getElementById("produkt-row-" + produktId);
+    if (!zeile) return;
+
+    zeile.classList.toggle("expanded");
+
+    const btn = zeile.querySelector(".mobile-toggle-btn");
+    if (btn) {
+        btn.innerText = zeile.classList.contains("expanded") ? "Weniger" : "Details";
+    }
+}
+
 function produkteAnzeigen() {
     const tabelle = document.getElementById("produktTabelle");
     tabelle.innerHTML = "";
@@ -951,8 +1016,23 @@ function produkteAnzeigen() {
             : ``;
 
         tabelle.innerHTML += `
-            <tr class="${istNiedrig ? 'low-stock' : ''}">
-                <td data-label="Produkt">${p.name}</td>
+            <tr id="produkt-row-${p.id}" class="product-row ${istNiedrig ? 'low-stock' : ''}">
+                <td data-label="Produkt">
+                    <div class="desktop-product-name">${p.name}</div>
+
+                    <div class="mobile-product-summary">
+                        <div class="mobile-product-meta">
+                            <strong>${p.name}</strong>
+                            <span>Bestand: ${p.menge}</span>
+                        </div>
+                        <button
+                            type="button"
+                            class="action-btn edit-btn mobile-toggle-btn"
+                            onclick="toggleProduktDetails('${p.id}', event)">
+                            Details
+                        </button>
+                    </div>
+                </td>
                 <td data-label="Kategorie">${p.kategorie}</td>
                 <td data-label="Bestand">${p.menge}</td>
                 <td data-label="Mindestmenge">${p.mindestmenge}</td>
