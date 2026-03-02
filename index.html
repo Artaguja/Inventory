@@ -14,112 +14,190 @@ body {
     font-family: Arial, sans-serif;
     background: #f2f2f2;
 }
+
 .header {
     background: black;
     color: white;
-    padding: 28px 30px; /* breiter gemacht */
+    padding: 28px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: relative;
-    min-height: 90px; /* schwarzer Balken höher */
+    min-height: 90px;
     box-sizing: border-box;
 }
+
 .header-left {
     font-weight: bold;
     z-index: 2;
 }
+
 .header-center {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
 }
+
 .header-logo {
     width: 90px;
     max-width: 100%;
     height: auto;
     display: block;
 }
+
 .header-right {
     z-index: 2;
 }
+
 .container {
     max-width: 1200px;
-    margin: 40px auto 20px auto; /* weiter runtergezogen */
+    margin: 40px auto 20px auto;
     background: white;
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-sizing: border-box;
 }
+
 input, button, select {
     padding: 10px;
     margin: 5px;
     font-size: 15px;
 }
+
 button {
     background: black;
     color: white;
     border: none;
     cursor: pointer;
 }
+
 button:hover {
     opacity: 0.85;
 }
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
 }
+
 th, td {
     border: 1px solid #ccc;
     padding: 8px;
     text-align: center;
     vertical-align: middle;
 }
+
 th {
     background: black;
     color: white;
 }
+
 .low-stock {
     background: #ffb3b3;
 }
+
 .hidden {
     display: none !important;
 }
+
 .action-btn {
     margin: 2px;
     padding: 6px 10px;
 }
+
 .edit-btn {
     background: #444;
 }
+
 .delete-btn {
     background: #7a0000;
 }
+
 .restock-btn {
     background: #0d5c2f;
 }
+
 .mail-btn {
     background: #1b4d8a;
 }
+
+.checkout-btn {
+    background: #0d5c2f;
+}
+
+.bulk-cart-btn {
+    background: #444;
+    margin-top: 10px;
+}
+
+.order-btn {
+    background: #8a5a00;
+}
+
 .info-box {
     background: #fafafa;
     border: 1px solid #ddd;
     padding: 10px;
     margin-top: 10px;
 }
+
 .small-note {
     font-size: 13px;
     color: #555;
     margin-top: 10px;
 }
 
-/* Login zentral */
+.cart-box {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.status-ordered {
+    background: #0d5c2f;
+    color: white;
+}
+
+.status-pending {
+    background: #b22222;
+    color: white;
+}
+
+.status-normal {
+    background: #ddd;
+    color: #333;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Login */
 #loginBereich {
     min-height: 80vh;
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
 .login-box {
     width: 100%;
     max-width: 500px;
@@ -128,7 +206,9 @@ th {
     border-radius: 10px;
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     text-align: center;
+    box-sizing: border-box;
 }
+
 .login-logo {
     width: 120px;
     max-width: 100%;
@@ -136,16 +216,19 @@ th {
     display: block;
     margin: 0 auto 20px auto;
 }
+
 .login-box h1 {
     margin-top: 0;
     margin-bottom: 25px;
     font-size: 32px;
     letter-spacing: 1px;
 }
+
 .login-box h2 {
     margin-bottom: 20px;
     font-size: 22px;
 }
+
 .login-box input {
     width: 100%;
     box-sizing: border-box;
@@ -153,6 +236,7 @@ th {
     margin: 10px 0;
     font-size: 16px;
 }
+
 .login-box button {
     width: 100%;
     padding: 14px;
@@ -160,7 +244,7 @@ th {
     font-size: 16px;
 }
 
-/* Produktformular links untereinander */
+/* Produktformular */
 .produkt-form {
     display: flex;
     flex-direction: column;
@@ -168,11 +252,161 @@ th {
     max-width: 320px;
     gap: 8px;
 }
+
 .produkt-form input,
 .produkt-form button {
     width: 100%;
     box-sizing: border-box;
     margin: 0;
+}
+
+/* MOBILE */
+@media (max-width: 900px) {
+    body {
+        font-size: 14px;
+    }
+
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px 16px;
+        min-height: auto;
+    }
+
+    .header-center {
+        position: static;
+        transform: none;
+        order: -1;
+    }
+
+    .header-left,
+    .header-right {
+        text-align: center;
+    }
+
+    .header-logo {
+        width: 70px;
+    }
+
+    .container {
+        margin: 16px 8px;
+        padding: 12px;
+        width: calc(100% - 16px);
+    }
+
+    .info-box,
+    .cart-box {
+        padding: 10px;
+    }
+
+    input, button, select {
+        font-size: 14px;
+        padding: 10px;
+        margin: 4px 0;
+    }
+
+    .action-btn {
+        width: 100%;
+        margin: 4px 0;
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .bulk-cart-btn,
+    .checkout-btn,
+    .mail-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .status-badge {
+        font-size: 11px;
+        padding: 5px 8px;
+    }
+
+    .login-box {
+        margin: 10px;
+        padding: 25px 20px;
+    }
+
+    .login-box h1 {
+        font-size: 26px;
+    }
+
+    .login-box h2 {
+        font-size: 20px;
+    }
+
+    .produkt-form {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .produkt-form input,
+    .produkt-form button {
+        width: 100%;
+    }
+
+    /* Tabellen werden zu Karten */
+    .mobile-card-table {
+        border: 0;
+        margin-top: 12px;
+    }
+
+    .mobile-card-table thead {
+        display: none;
+    }
+
+    .mobile-card-table,
+    .mobile-card-table tbody,
+    .mobile-card-table tr,
+    .mobile-card-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .mobile-card-table tr {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 10px;
+        margin-bottom: 12px;
+    }
+
+    .mobile-card-table tr.low-stock {
+        background: #ffebeb;
+        border-color: #e0a0a0;
+    }
+
+    .mobile-card-table td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        text-align: left;
+        padding: 8px 0;
+    }
+
+    .mobile-card-table td:last-child {
+        border-bottom: none;
+    }
+
+    .mobile-card-table td::before {
+        content: attr(data-label);
+        display: block;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .mobile-card-table td input[type="number"] {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+    .table-wrapper {
+        overflow-x: visible;
+    }
 }
 </style>
 </head>
@@ -182,7 +416,7 @@ th {
     <div class="header-left"><strong>ART AGUJA INVENTORY SYSTEM</strong></div>
 
     <div class="header-center">
-        <img src="logo.png" alt="ART AGUJA Logo" class="header-logo">
+        <img src="logo2.png" alt="ART AGUJA Logo" class="header-logo">
     </div>
 
     <div class="header-right">
@@ -239,16 +473,18 @@ th {
             <input type="password" id="neuPass" placeholder="Passwort">
             <button onclick="artistHinzufuegen()">Hinzufügen</button>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Benutzer</th>
-                        <th>Rolle</th>
-                        <th>Aktion</th>
-                    </tr>
-                </thead>
-                <tbody id="userTabelle"></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="mobile-card-table">
+                    <thead>
+                        <tr>
+                            <th>Benutzer</th>
+                            <th>Rolle</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTabelle"></tbody>
+                </table>
+            </div>
 
             <hr>
 
@@ -262,84 +498,104 @@ th {
 
             <h3>Entnahme Historie</h3>
             <button onclick="excelExport()">Historie als Excel exportieren</button>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>ARTIST</th>
-                        <th>Produkt</th>
-                        <th>Menge</th>
-                    </tr>
-                </thead>
-                <tbody id="historieTabelle"></tbody>
-            </table>
+            <div class="table-wrapper">
+                <table class="mobile-card-table">
+                    <thead>
+                        <tr>
+                            <th>Datum</th>
+                            <th>ARTIST</th>
+                            <th>Produkt</th>
+                            <th>Menge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historieTabelle"></tbody>
+                </table>
+            </div>
 
             <hr>
 
             <h3>ARTIST Statistik</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ARTIST</th>
-                        <th>Gesamt entnommene Menge</th>
-                    </tr>
-                </thead>
-                <tbody id="statistikTabelle"></tbody>
-            </table>
+            <button class="delete-btn" onclick="statistikZuruecksetzen()">Statistik zurücksetzen</button>
+            <div class="table-wrapper">
+                <table class="mobile-card-table">
+                    <thead>
+                        <tr>
+                            <th>ARTIST</th>
+                            <th>Gesamt entnommene Menge</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statistikTabelle"></tbody>
+                </table>
+            </div>
         </div>
 
         <hr>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Produkt</th>
-                    <th>Kategorie</th>
-                    <th>Bestand</th>
-                    <th>Mindestmenge</th>
-                    <th>Lieferant</th>
-                    <th>Entnahme</th>
-                    <th id="verwaltungsSpalte">Verwaltung</th>
-                </tr>
-            </thead>
-            <tbody id="produktTabelle"></tbody>
-        </table>
+        <div class="table-wrapper">
+            <table class="mobile-card-table">
+                <thead>
+                    <tr>
+                        <th>Produkt</th>
+                        <th>Kategorie</th>
+                        <th>Bestand</th>
+                        <th>Mindestmenge</th>
+                        <th>Lieferant</th>
+                        <th>Status</th>
+                        <th>Menge</th>
+                        <th id="verwaltungsSpalte">Verwaltung</th>
+                    </tr>
+                </thead>
+                <tbody id="produktTabelle"></tbody>
+            </table>
+        </div>
+
+        <button class="bulk-cart-btn" onclick="alleEingabenInWarenkorb()">Ausgewählte Mengen in den Warenkorb</button>
+
+        <div class="cart-box">
+            <h3>Warenkorb</h3>
+            <button class="checkout-btn" onclick="warenkorbAuschecken()">Warenkorb komplett auschecken</button>
+            <div class="table-wrapper">
+                <table class="mobile-card-table">
+                    <thead>
+                        <tr>
+                            <th>Produkt</th>
+                            <th>Kategorie</th>
+                            <th>Menge</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="warenkorbTabelle"></tbody>
+                </table>
+            </div>
+        </div>
 
     </div>
 </div>
 
 <script>
-/* =========================
-   EMAILJS KONFIGURATION
-   HIER DEINE WERTE EINTRAGEN
-========================= */
 const EMAILJS_PUBLIC_KEY = "702W46bqfrYjYj2T5";
 const EMAILJS_SERVICE_ID = "service_qy3c5ul";
 const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
 const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
 
-/*
-EmailJS Template Variablen, die du in EmailJS verwenden solltest:
-
-{{to_email}}
-{{produkt_name}}
-{{kategorie}}
-{{aktueller_bestand}}
-{{mindestbestand}}
-{{entnommene_menge}}
-{{artist}}
-{{zeitpunkt}}
-{{nachricht}}
-*/
-
 let produkte = JSON.parse(localStorage.getItem("produkte")) || [];
 let entnahmen = JSON.parse(localStorage.getItem("entnahmen")) || [];
 let users = JSON.parse(localStorage.getItem("users")) || [];
+let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
 
 let aktuellerUser = null;
 let bearbeiteIndex = -1;
 
-/* Benutzer bereinigen + festen Admin setzen */
+produkte = produkte.map(p => ({
+    id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+    name: p.name || "",
+    kategorie: p.kategorie || "",
+    menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
+    mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
+    lieferantenHomepage: p.lieferantenHomepage || "",
+    nachbestellt: !!p.nachbestellt
+}));
+
 if (!Array.isArray(users)) {
     users = [];
 }
@@ -374,15 +630,13 @@ if (adminIndex === -1) {
 }
 
 localStorage.setItem("users", JSON.stringify(users));
+localStorage.setItem("produkte", JSON.stringify(produkte));
 
-/* EmailJS initialisieren */
 if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY") {
     emailjs.init({
         publicKey: EMAILJS_PUBLIC_KEY
     });
 }
-
-/* LOGIN */
 
 function login() {
     const user = document.getElementById("loginUser").value.trim();
@@ -397,7 +651,7 @@ function login() {
     aktuellerUser = gefunden;
 
     document.getElementById("loginBereich").classList.add("hidden");
-    document.getElementById("loginBereich").style.display = "none"; /* sicher komplett ausblenden */
+    document.getElementById("loginBereich").style.display = "none";
     document.getElementById("mainBereich").classList.remove("hidden");
     document.getElementById("header").classList.remove("hidden");
 
@@ -430,7 +684,9 @@ function login() {
         document.getElementById("cancelEditBtn").style.display = "none";
     }
 
+    bereinigeWarenkorb();
     produkteAnzeigen();
+    warenkorbAnzeigen();
 }
 
 function logout() {
@@ -438,12 +694,11 @@ function logout() {
     location.reload();
 }
 
-/* HILFSFUNKTIONEN */
-
 function speichern() {
     localStorage.setItem("produkte", JSON.stringify(produkte));
     localStorage.setItem("entnahmen", JSON.stringify(entnahmen));
     localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("warenkorb", JSON.stringify(warenkorb));
 }
 
 function formLeeren() {
@@ -477,7 +732,23 @@ function emailIstKonfiguriert() {
            EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
 }
 
-/* EMAIL */
+function getProduktById(id) {
+    return produkte.find(p => p.id === id);
+}
+
+function berechneMengeImWarenkorb(produktId) {
+    return warenkorb
+        .filter(w => w.produktId === produktId)
+        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
+}
+
+function bereinigeWarenkorb() {
+    warenkorb = warenkorb.filter(w => {
+        const produkt = getProduktById(w.produktId);
+        return !!produkt;
+    });
+    speichern();
+}
 
 function sendeMindestbestandEmail(produkt, entnommeneMenge) {
     if (!emailIstKonfiguriert()) {
@@ -486,16 +757,16 @@ function sendeMindestbestandEmail(produkt, entnommeneMenge) {
     }
 
     const templateParams = {
-    to_email: BENACHRICHTIGUNGS_EMAIL,
-    produkt_name: produkt.name,
-    kategorie: produkt.kategorie,
-    lieferant: produkt.lieferantenHomepage,
-    aktueller_bestand: produkt.menge,
-    mindestbestand: produkt.mindestmenge,
-    entnommene_menge: entnommeneMenge,
-    artist: aktuellerUser ? aktuellerUser.username : "System",
-    zeitpunkt: datumDeutsch(),
-    nachricht:
+        to_email: BENACHRICHTIGUNGS_EMAIL,
+        produkt_name: produkt.name,
+        kategorie: produkt.kategorie,
+        lieferant: produkt.lieferantenHomepage,
+        aktueller_bestand: produkt.menge,
+        mindestbestand: produkt.mindestmenge,
+        entnommene_menge: entnommeneMenge,
+        artist: aktuellerUser ? aktuellerUser.username : "System",
+        zeitpunkt: datumDeutsch(),
+        nachricht:
 `Der Mindestbestand wurde unterschritten.
 
 Produkt: ${produkt.name}
@@ -506,7 +777,7 @@ Mindestbestand: ${produkt.mindestmenge}
 Entnommene Menge: ${entnommeneMenge}
 ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
 Zeitpunkt: ${datumDeutsch()}`
-};
+    };
 
     return emailjs.send(
         EMAILJS_SERVICE_ID,
@@ -527,7 +798,8 @@ function testEmailSenden() {
         name: "Testprodukt",
         kategorie: "Testkategorie",
         menge: 1,
-        mindestmenge: 3
+        mindestmenge: 3,
+        lieferantenHomepage: "-"
     };
 
     sendeMindestbestandEmail(testProdukt, 1)
@@ -539,8 +811,6 @@ function testEmailSenden() {
             alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
         });
 }
-
-/* PRODUKTE */
 
 function produktSpeichern() {
     if (aktuellerUser?.rolle !== "admin") return;
@@ -562,11 +832,13 @@ function produktSpeichern() {
     }
 
     const produkt = {
+        id: bearbeiteIndex === -1 ? ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)) : produkte[bearbeiteIndex].id,
         name: produktName,
         kategorie: produktKategorie,
         menge: produktMenge,
         mindestmenge: produktMindestmenge,
-        lieferantenHomepage: produktLieferantenHomepage
+        lieferantenHomepage: produktLieferantenHomepage,
+        nachbestellt: bearbeiteIndex === -1 ? false : !!produkte[bearbeiteIndex].nachbestellt
     };
 
     if (bearbeiteIndex === -1) {
@@ -599,10 +871,21 @@ function produktSpeichern() {
         produkte.push(produkt);
     } else {
         produkte[bearbeiteIndex] = produkt;
+        warenkorb = warenkorb.map(w => {
+            if (w.produktId === produkt.id) {
+                return {
+                    ...w,
+                    name: produkt.name,
+                    kategorie: produkt.kategorie
+                };
+            }
+            return w;
+        });
     }
 
     speichern();
     produkteAnzeigen();
+    warenkorbAnzeigen();
     formLeeren();
     bearbeitungAbbrechen();
 }
@@ -614,7 +897,7 @@ function produkteAnzeigen() {
     const suchbegriff = document.getElementById("suche")?.value.toLowerCase() || "";
     const lagerFilter = document.getElementById("lagerFilter")?.value || "alle";
 
-    produkte.forEach((p, index) => {
+    const gefilterteProdukte = produkte.filter(p => {
         const name = (p.name || "").toLowerCase();
         const kategorie = (p.kategorie || "").toLowerCase();
 
@@ -622,37 +905,76 @@ function produkteAnzeigen() {
         const istNiedrig = p.menge <= p.mindestmenge;
         const passtFilter = lagerFilter === "alle" || (lagerFilter === "niedrig" && istNiedrig);
 
-        if (!passtSuche || !passtFilter) return;
+        return passtSuche && passtFilter;
+    });
+
+    gefilterteProdukte.sort((a, b) => {
+        const aNiedrig = a.menge <= a.mindestmenge ? 0 : 1;
+        const bNiedrig = b.menge <= b.mindestmenge ? 0 : 1;
+
+        if (aNiedrig !== bNiedrig) {
+            return aNiedrig - bNiedrig;
+        }
+
+        return a.name.localeCompare(b.name, "de", { sensitivity: "base" });
+    });
+
+    gefilterteProdukte.forEach((p) => {
+        const originalIndex = produkte.findIndex(prod => prod.id === p.id);
+        const istNiedrig = p.menge <= p.mindestmenge;
 
         const linkHTML = p.lieferantenHomepage
             ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
             : `-`;
 
+        let statusHTML = `<span class="status-badge status-normal">OK</span>`;
+
+        if (istNiedrig && p.nachbestellt) {
+            statusHTML = `<span class="status-badge status-ordered">NACHBESTELLT</span>`;
+        } else if (istNiedrig && !p.nachbestellt) {
+            statusHTML = `<span class="status-badge status-pending">NICHT NACHBESTELLT</span>`;
+        }
+
         const verwaltungHTML = aktuellerUser?.rolle === "admin"
             ? `
-                <button class="action-btn edit-btn" onclick="produktBearbeiten(${index})">Bearbeiten</button>
-                <button class="action-btn restock-btn" onclick="produktAufstocken(${index})">Aufstocken</button>
-                <button class="action-btn delete-btn" onclick="produktLoeschen(${index})">Löschen</button>
+                <button class="action-btn edit-btn" onclick="produktBearbeiten(${originalIndex})">Bearbeiten</button>
+                <button class="action-btn restock-btn" onclick="produktAufstocken(${originalIndex})">Aufstocken</button>
+                ${
+                    istNiedrig
+                        ? `<button class="action-btn order-btn" onclick="nachbestellStatusWechseln(${originalIndex})">
+                            ${p.nachbestellt ? 'Bestellung zurücksetzen' : 'Als nachbestellt markieren'}
+                           </button>`
+                        : `<button class="action-btn order-btn" disabled>Nicht nötig</button>`
+                }
+                <button class="action-btn delete-btn" onclick="produktLoeschen(${originalIndex})">Löschen</button>
               `
             : ``;
 
         tabelle.innerHTML += `
             <tr class="${istNiedrig ? 'low-stock' : ''}">
-                <td>${p.name}</td>
-                <td>${p.kategorie}</td>
-                <td>${p.menge}</td>
-                <td>${p.mindestmenge}</td>
-                <td>${linkHTML}</td>
-                <td>
-                    <input type="number" id="entnahme${index}" value="1" min="1" style="width:60px;">
-                    <button onclick="entnehmen(${index})">OK</button>
+                <td data-label="Produkt">${p.name}</td>
+                <td data-label="Kategorie">${p.kategorie}</td>
+                <td data-label="Bestand">${p.menge}</td>
+                <td data-label="Mindestmenge">${p.mindestmenge}</td>
+                <td data-label="Lieferant">${linkHTML}</td>
+                <td data-label="Status">${statusHTML}</td>
+                <td data-label="Menge">
+                    <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
                 </td>
-                <td ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
+                <td data-label="Verwaltung" ${aktuellerUser?.rolle !== "admin" ? 'style="display:none;"' : ''}>
                     ${verwaltungHTML}
                 </td>
             </tr>
         `;
     });
+
+    if (gefilterteProdukte.length === 0) {
+        tabelle.innerHTML = `
+            <tr>
+                <td data-label="Info" colspan="${aktuellerUser?.rolle === "admin" ? 8 : 7}">Keine Produkte gefunden.</td>
+            </tr>
+        `;
+    }
 }
 
 function produktBearbeiten(index) {
@@ -685,10 +1007,27 @@ function produktAufstocken(index) {
     }
 
     produkte[index].menge += aufstockMenge;
+    produkte[index].nachbestellt = false;
     speichern();
     produkteAnzeigen();
 
     alert(`Bestand von "${produkte[index].name}" wurde um ${aufstockMenge} erhöht.`);
+}
+
+function nachbestellStatusWechseln(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const produkt = produkte[index];
+    if (!produkt) return;
+
+    if (produkt.menge > produkt.mindestmenge) {
+        alert("Dieses Produkt ist nicht im roten Bereich.");
+        return;
+    }
+
+    produkt.nachbestellt = !produkt.nachbestellt;
+    speichern();
+    produkteAnzeigen();
 }
 
 function bearbeitungAbbrechen() {
@@ -705,56 +1044,181 @@ function produktLoeschen(index) {
     const bestaetigt = confirm(`Produkt "${produkte[index].name}" wirklich löschen?`);
     if (!bestaetigt) return;
 
+    const geloeschteProduktId = produkte[index].id;
+
     produkte.splice(index, 1);
+    warenkorb = warenkorb.filter(w => w.produktId !== geloeschteProduktId);
+
     speichern();
     produkteAnzeigen();
+    warenkorbAnzeigen();
 }
 
-function entnehmen(i) {
-    const feld = document.getElementById("entnahme" + i);
-    const menge = parseInt(feld.value);
+function alleEingabenInWarenkorb() {
+    let hatMindestensEineMenge = false;
 
-    if (isNaN(menge) || menge <= 0 || menge > produkte[i].menge) {
-        alert("Ungültige Menge");
+    for (let produkt of produkte) {
+        const feld = document.getElementById("entnahme" + produkt.id);
+        if (!feld) continue;
+
+        const rohwert = feld.value.trim();
+        if (rohwert === "") continue;
+
+        const menge = parseInt(rohwert);
+
+        if (isNaN(menge) || menge < 0) {
+            alert(`Ungültige Menge bei "${produkt.name}".`);
+            return;
+        }
+
+        if (menge === 0) continue;
+
+        hatMindestensEineMenge = true;
+
+        const bereitsImWarenkorb = berechneMengeImWarenkorb(produkt.id);
+        if (bereitsImWarenkorb + menge > produkt.menge) {
+            alert(`Nicht genug Bestand für "${produkt.name}".`);
+            return;
+        }
+    }
+
+    if (!hatMindestensEineMenge) {
+        alert("Bitte zuerst Mengen bei den Produkten eintragen.");
         return;
     }
 
-    const alterBestand = produkte[i].menge;
+    for (let produkt of produkte) {
+        const feld = document.getElementById("entnahme" + produkt.id);
+        if (!feld) continue;
 
-    produkte[i].menge -= menge;
+        const rohwert = feld.value.trim();
+        if (rohwert === "") continue;
 
-    entnahmen.push({
-        datum: datumDeutsch(),
-        artist: aktuellerUser.username,
-        produkt: produkte[i].name,
-        menge: menge
-    });
+        const menge = parseInt(rohwert);
+        if (isNaN(menge) || menge <= 0) continue;
+
+        const vorhandenerEintrag = warenkorb.find(w => w.produktId === produkt.id);
+
+        if (vorhandenerEintrag) {
+            vorhandenerEintrag.menge += menge;
+        } else {
+            warenkorb.push({
+                produktId: produkt.id,
+                name: produkt.name,
+                kategorie: produkt.kategorie,
+                menge: menge
+            });
+        }
+
+        feld.value = "";
+    }
 
     speichern();
+    warenkorbAnzeigen();
+    alert("Alle eingetragenen Mengen wurden in den Warenkorb gelegt.");
+}
+
+function warenkorbAnzeigen() {
+    const tabelle = document.getElementById("warenkorbTabelle");
+    if (!tabelle) return;
+
+    tabelle.innerHTML = "";
+
+    if (warenkorb.length === 0) {
+        tabelle.innerHTML = `
+            <tr>
+                <td data-label="Info" colspan="4">Warenkorb ist leer.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    warenkorb.forEach((eintrag, index) => {
+        tabelle.innerHTML += `
+            <tr>
+                <td data-label="Produkt">${eintrag.name}</td>
+                <td data-label="Kategorie">${eintrag.kategorie}</td>
+                <td data-label="Menge">${eintrag.menge}</td>
+                <td data-label="Aktion">
+                    <button class="delete-btn action-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function ausWarenkorbEntfernen(index) {
+    warenkorb.splice(index, 1);
+    speichern();
+    warenkorbAnzeigen();
+}
+
+function warenkorbAuschecken() {
+    if (warenkorb.length === 0) {
+        alert("Der Warenkorb ist leer.");
+        return;
+    }
+
+    for (let eintrag of warenkorb) {
+        const produkt = getProduktById(eintrag.produktId);
+
+        if (!produkt) {
+            alert(`Produkt "${eintrag.name}" wurde nicht gefunden.`);
+            return;
+        }
+
+        if (eintrag.menge > produkt.menge) {
+            alert(`Nicht genug Bestand für "${produkt.name}".`);
+            return;
+        }
+    }
+
+    let emailBenachrichtigungen = [];
+
+    for (let eintrag of warenkorb) {
+        const produkt = getProduktById(eintrag.produktId);
+        const alterBestand = produkt.menge;
+
+        produkt.menge -= eintrag.menge;
+
+        entnahmen.push({
+            datum: datumDeutsch(),
+            artist: aktuellerUser.username,
+            produkt: produkt.name,
+            menge: eintrag.menge
+        });
+
+        const mindestbestandNeuUnterschritten =
+            alterBestand > produkt.mindestmenge &&
+            produkt.menge <= produkt.mindestmenge;
+
+        if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
+            emailBenachrichtigungen.push({
+                produkt: produkt,
+                menge: eintrag.menge
+            });
+        }
+    }
+
+    warenkorb = [];
+    speichern();
     produkteAnzeigen();
+    warenkorbAnzeigen();
 
     if (aktuellerUser.rolle === "admin") {
         historieAnzeigen();
         statistikAnzeigen();
     }
 
-    const mindestbestandNeuUnterschritten =
-        alterBestand > produkte[i].mindestmenge &&
-        produkte[i].menge <= produkte[i].mindestmenge;
-
-    if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
-        sendeMindestbestandEmail(produkte[i], menge)
-            .then(() => {
-                alert(`Mindestbestand unterschritten. E-Mail wurde an ${BENACHRICHTIGUNGS_EMAIL} versendet.`);
-            })
-            .catch((error) => {
+    emailBenachrichtigungen.forEach(eintrag => {
+        sendeMindestbestandEmail(eintrag.produkt, eintrag.menge)
+            .catch(error => {
                 console.error("E-Mail Versand fehlgeschlagen:", error);
-                alert("Mindestbestand unterschritten, aber die E-Mail konnte nicht versendet werden.");
             });
-    }
-}
+    });
 
-/* HISTORIE */
+    alert("Warenkorb wurde erfolgreich ausgecheckt.");
+}
 
 function historieAnzeigen() {
     const tabelle = document.getElementById("historieTabelle");
@@ -763,16 +1227,22 @@ function historieAnzeigen() {
     [...entnahmen].reverse().slice(0, 5).forEach(e => {
         tabelle.innerHTML += `
             <tr>
-                <td>${e.datum}</td>
-                <td>${e.artist}</td>
-                <td>${e.produkt}</td>
-                <td>${e.menge}</td>
+                <td data-label="Datum">${e.datum}</td>
+                <td data-label="ARTIST">${e.artist}</td>
+                <td data-label="Produkt">${e.produkt}</td>
+                <td data-label="Menge">${e.menge}</td>
             </tr>
         `;
     });
-}
 
-/* STATISTIK */
+    if (entnahmen.length === 0) {
+        tabelle.innerHTML = `
+            <tr>
+                <td data-label="Info" colspan="4">Keine Historie vorhanden.</td>
+            </tr>
+        `;
+    }
+}
 
 function statistikAnzeigen() {
     const stats = {};
@@ -784,17 +1254,40 @@ function statistikAnzeigen() {
     const statistikTabelle = document.getElementById("statistikTabelle");
     statistikTabelle.innerHTML = "";
 
-    Object.keys(stats).forEach(user => {
+    const userKeys = Object.keys(stats);
+
+    if (userKeys.length === 0) {
+        statistikTabelle.innerHTML = `
+            <tr>
+                <td data-label="Info" colspan="2">Keine Statistik vorhanden.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    userKeys.forEach(user => {
         statistikTabelle.innerHTML += `
             <tr>
-                <td>${user}</td>
-                <td>${stats[user]}</td>
+                <td data-label="ARTIST">${user}</td>
+                <td data-label="Gesamt entnommene Menge">${stats[user]}</td>
             </tr>
         `;
     });
 }
 
-/* EXCEL EXPORT */
+function statistikZuruecksetzen() {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const bestaetigt = confirm("Möchtest du wirklich die komplette Statistik und Entnahme-Historie zurücksetzen?");
+    if (!bestaetigt) return;
+
+    entnahmen = [];
+    speichern();
+    historieAnzeigen();
+    statistikAnzeigen();
+
+    alert("Statistik und Entnahme-Historie wurden zurückgesetzt.");
+}
 
 function excelExport() {
     if (entnahmen.length === 0) {
@@ -807,8 +1300,6 @@ function excelExport() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Historie");
     XLSX.writeFile(workbook, "Entnahme_Historie.xlsx");
 }
-
-/* ARTIST */
 
 function artistHinzufuegen() {
     if (aktuellerUser?.rolle !== "admin") return;
@@ -848,15 +1339,23 @@ function userAnzeigen() {
         if (u.rolle !== "admin") {
             userTabelle.innerHTML += `
                 <tr>
-                    <td>${u.username}</td>
-                    <td>${u.rolle.toUpperCase()}</td>
-                    <td>
-                        <button class="delete-btn" onclick="artistLoeschen(${index})">Löschen</button>
+                    <td data-label="Benutzer">${u.username}</td>
+                    <td data-label="Rolle">${u.rolle.toUpperCase()}</td>
+                    <td data-label="Aktion">
+                        <button class="delete-btn action-btn" onclick="artistLoeschen(${index})">Löschen</button>
                     </td>
                 </tr>
             `;
         }
     });
+
+    if (users.filter(u => u.rolle !== "admin").length === 0) {
+        userTabelle.innerHTML = `
+            <tr>
+                <td data-label="Info" colspan="3">Keine ARTISTS vorhanden.</td>
+            </tr>
+        `;
+    }
 }
 
 function artistLoeschen(index) {
@@ -868,7 +1367,6 @@ function artistLoeschen(index) {
     users.splice(index, 1);
     speichern();
     userAnzeigen();
-
 }
 
 document.getElementById("loginUser").addEventListener("keydown", function(event) {
@@ -882,7 +1380,6 @@ document.getElementById("loginPass").addEventListener("keydown", function(event)
         login();
     }
 });
-
 </script>
 
 </body>
