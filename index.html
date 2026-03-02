@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>ART AGUJA INVENTORY</title>
-
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="ART AGUJA INVENTORY">
-</head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ART AGUJA INVENTORY SYSTEM</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore-compat.js"></script>
 
 <style>
 body {
@@ -82,6 +74,11 @@ button:hover {
     opacity: 0.85;
 }
 
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -129,10 +126,6 @@ th {
     background: #1b4d8a;
 }
 
-.cart-btn {
-    background: #444;
-}
-
 .checkout-btn {
     background: #0d5c2f;
 }
@@ -140,6 +133,10 @@ th {
 .bulk-cart-btn {
     background: #444;
     margin-top: 10px;
+}
+
+.order-btn {
+    background: #8a5a00;
 }
 
 .info-box {
@@ -162,20 +159,31 @@ th {
     margin-top: 20px;
 }
 
-.password-box {
-    background: #fafafa;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-top: 20px;
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
 }
 
-.password-box input {
-    max-width: 320px;
-    width: 100%;
-    box-sizing: border-box;
-    display: block;
+.status-ordered {
+    background: #0d5c2f;
+    color: white;
 }
 
+.status-pending {
+    background: #b22222;
+    color: white;
+}
+
+.status-normal {
+    background: #ddd;
+    color: #333;
+}
+
+/* Login zentral */
 #loginBereich {
     min-height: 80vh;
     display: flex;
@@ -228,6 +236,7 @@ th {
     font-size: 16px;
 }
 
+/* Produktformular links untereinander */
 .produkt-form {
     display: flex;
     flex-direction: column;
@@ -240,11 +249,6 @@ th {
 .produkt-form button {
     width: 100%;
     box-sizing: border-box;
-    margin: 0;
-}
-
-.admin-user-input {
-    width: 170px;
     margin: 0;
 }
 
@@ -299,19 +303,6 @@ th {
 
     <div id="mainBereich" class="hidden">
 
-        <div class="password-box">
-            <h3>Mein Passwort ändern</h3>
-            <input type="password" id="eigenesAktuellesPasswort" placeholder="Aktuelles Passwort">
-            <input type="password" id="eigenesNeuesPasswort" placeholder="Neues Passwort">
-            <input type="password" id="eigenesNeuesPasswortWiederholen" placeholder="Neues Passwort wiederholen">
-            <button onclick="eigenesPasswortAendern()">Eigenes Passwort ändern</button>
-            <div class="small-note">
-                Jeder Benutzer kann hier sein eigenes Passwort ändern.
-            </div>
-        </div>
-
-        <hr>
-
         <h3 id="produktFormTitel">Produkt hinzufügen</h3>
         <div class="produkt-form">
             <input type="text" id="name" placeholder="Produktname">
@@ -350,7 +341,6 @@ th {
                     <tr>
                         <th>Benutzer</th>
                         <th>Rolle</th>
-                        <th>Neues Passwort</th>
                         <th>Aktion</th>
                     </tr>
                 </thead>
@@ -362,7 +352,7 @@ th {
             <h3>E-Mail Benachrichtigung</h3>
             <button class="mail-btn" onclick="testEmailSenden()">Testmail senden</button>
             <div class="small-note">
-                Public Key, Service ID und Template ID sind im Code eingetragen.
+                Trage im Code deinen Public Key, Service ID und Template ID von EmailJS ein.
             </div>
 
             <hr>
@@ -406,6 +396,7 @@ th {
                     <th>Bestand</th>
                     <th>Mindestmenge</th>
                     <th>Lieferant</th>
+                    <th>Status</th>
                     <th>Menge</th>
                     <th id="verwaltungsSpalte">Verwaltung</th>
                 </tr>
@@ -440,246 +431,68 @@ const EMAILJS_SERVICE_ID = "service_qy3c5ul";
 const EMAILJS_TEMPLATE_ID = "template_nzs6wzr";
 const BENACHRICHTIGUNGS_EMAIL = "Lager@artaguja-tattoo.com";
 
-if (typeof emailjs !== "undefined") {
+let produkte = JSON.parse(localStorage.getItem("produkte")) || [];
+let entnahmen = JSON.parse(localStorage.getItem("entnahmen")) || [];
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let warenkorb = JSON.parse(localStorage.getItem("warenkorb")) || [];
+
+let aktuellerUser = null;
+let bearbeiteIndex = -1;
+
+/* Produkt-IDs + Nachbestellstatus sicherstellen */
+produkte = produkte.map(p => ({
+    id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
+    name: p.name || "",
+    kategorie: p.kategorie || "",
+    menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
+    mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
+    lieferantenHomepage: p.lieferantenHomepage || "",
+    nachbestellt: !!p.nachbestellt
+}));
+
+if (!Array.isArray(users)) {
+    users = [];
+}
+
+users = users.map(u => {
+    let rolle = (u.rolle || "").toString().toLowerCase().trim();
+
+    if (rolle === "mitarbeiter") rolle = "artist";
+    if (rolle !== "admin" && rolle !== "artist") {
+        rolle = "artist";
+    }
+
+    return {
+        username: (u.username || "").toString(),
+        password: (u.password || "").toString(),
+        rolle: rolle
+    };
+});
+
+const adminIndex = users.findIndex(u => u.rolle === "admin");
+
+if (adminIndex === -1) {
+    users.unshift({
+        username: "Salva",
+        password: "1307",
+        rolle: "admin"
+    });
+} else {
+    users[adminIndex].username = "Salva";
+    users[adminIndex].password = "1307";
+    users[adminIndex].rolle = "admin";
+}
+
+localStorage.setItem("users", JSON.stringify(users));
+localStorage.setItem("produkte", JSON.stringify(produkte));
+
+if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY") {
     emailjs.init({
         publicKey: EMAILJS_PUBLIC_KEY
     });
 }
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBYwbDcLCJk53mdy8XtQTYAJ2OrlsDuzqk",
-    authDomain: "inventory-db037.firebaseapp.com",
-    projectId: "inventory-db037",
-    storageBucket: "inventory-db037.firebasestorage.app",
-    messagingSenderId: "511415225217",
-    appId: "1:511415225217:web:f08b9e7007d0a19184b680"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const appDoc = db.collection("app").doc("inventoryData");
-
-let produkte = [];
-let entnahmen = [];
-let users = [];
-let warenkorb = [];
-
-let aktuellerUser = null;
-let bearbeiteIndex = -1;
-let datenGeladen = false;
-
-function datenNormalisieren() {
-    produkte = Array.isArray(produkte) ? produkte : [];
-    entnahmen = Array.isArray(entnahmen) ? entnahmen : [];
-    users = Array.isArray(users) ? users : [];
-    warenkorb = Array.isArray(warenkorb) ? warenkorb : [];
-
-    produkte = produkte.map(p => ({
-        id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
-        name: p.name || "",
-        kategorie: p.kategorie || "",
-        menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
-        mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
-        lieferantenHomepage: p.lieferantenHomepage || ""
-    }));
-
-    users = users.map(u => {
-        let rolle = (u.rolle || "").toString().toLowerCase().trim();
-
-        if (rolle === "mitarbeiter") rolle = "artist";
-        if (rolle !== "admin" && rolle !== "artist") {
-            rolle = "artist";
-        }
-
-        return {
-            username: (u.username || "").toString(),
-            password: (u.password || "").toString(),
-            rolle: rolle
-        };
-    });
-
-    const adminIndex = users.findIndex(u => u.rolle === "admin");
-
-    if (adminIndex === -1) {
-        users.unshift({
-            username: "Salva",
-            password: "1307",
-            rolle: "admin"
-        });
-    } else {
-        users[adminIndex].username = "Salva";
-        users[adminIndex].password = "1307";
-        users[adminIndex].rolle = "admin";
-    }
-}
-
-async function ladeDatenAusFirebase() {
-    try {
-        const doc = await appDoc.get();
-
-        if (doc.exists) {
-            const data = doc.data();
-            produkte = data.produkte || [];
-            entnahmen = data.entnahmen || [];
-            users = data.users || [];
-            warenkorb = data.warenkorb || [];
-        } else {
-            produkte = [];
-            entnahmen = [];
-            users = [];
-            warenkorb = [];
-        }
-
-        datenNormalisieren();
-        await speichern();
-        datenGeladen = true;
-        console.log("Daten aus Firebase geladen.");
-    } catch (error) {
-        console.error("Fehler beim Laden aus Firebase:", error);
-        alert("Firebase-Daten konnten nicht geladen werden.");
-    }
-}
-
-async function speichern() {
-    datenNormalisieren();
-
-    try {
-        await appDoc.set({
-            produkte: produkte,
-            entnahmen: entnahmen,
-            users: users,
-            warenkorb: warenkorb
-        });
-    } catch (error) {
-        console.error("Fehler beim Speichern in Firebase:", error);
-        alert("Daten konnten nicht in Firebase gespeichert werden.");
-    }
-}
-
-function formLeeren() {
-    document.getElementById("name").value = "";
-    document.getElementById("kategorie").value = "";
-    document.getElementById("menge").value = "";
-    document.getElementById("mindestmenge").value = "";
-    document.getElementById("lieferantenHomepage").value = "";
-}
-
-function sichereURL(url) {
-    if (!url) return "";
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-        return "https://" + url;
-    }
-    return url;
-}
-
-function datumDeutsch() {
-    return new Date().toLocaleString("de-DE");
-}
-
-function istGleichesProdukt(a, b) {
-    return a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
-           a.kategorie.trim().toLowerCase() === b.kategorie.trim().toLowerCase();
-}
-
-function emailIstKonfiguriert() {
-    return EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY" &&
-           EMAILJS_SERVICE_ID !== "DEIN_SERVICE_ID" &&
-           EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
-}
-
-function getProduktById(id) {
-    return produkte.find(p => p.id === id);
-}
-
-function berechneMengeImWarenkorb(produktId) {
-    return warenkorb
-        .filter(w => w.produktId === produktId)
-        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
-}
-
-function bereinigeWarenkorb() {
-    warenkorb = warenkorb.filter(w => {
-        const produkt = getProduktById(w.produktId);
-        return !!produkt;
-    });
-    speichern();
-}
-
-function safeInputId(text) {
-    return String(text).replace(/[^a-zA-Z0-9_-]/g, "_");
-}
-
-function sendeMindestbestandEmail(produkt, entnommeneMenge) {
-    if (!emailIstKonfiguriert()) {
-        console.warn("EmailJS ist noch nicht konfiguriert.");
-        return Promise.reject("EmailJS nicht konfiguriert");
-    }
-
-    const templateParams = {
-        to_email: BENACHRICHTIGUNGS_EMAIL,
-        produkt_name: produkt.name,
-        kategorie: produkt.kategorie,
-        lieferant: produkt.lieferantenHomepage || "-",
-        aktueller_bestand: produkt.menge,
-        mindestbestand: produkt.mindestmenge,
-        entnommene_menge: entnommeneMenge,
-        artist: aktuellerUser ? aktuellerUser.username : "System",
-        zeitpunkt: datumDeutsch(),
-        nachricht:
-`Der Mindestbestand wurde unterschritten.
-
-Produkt: ${produkt.name}
-Kategorie: ${produkt.kategorie}
-Lieferant: ${produkt.lieferantenHomepage || "-"}
-Aktueller Bestand: ${produkt.menge}
-Mindestbestand: ${produkt.mindestmenge}
-Entnommene Menge: ${entnommeneMenge}
-ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
-Zeitpunkt: ${datumDeutsch()}`
-    };
-
-    return emailjs.send(
-        EMAILJS_SERVICE_ID,
-        EMAILJS_TEMPLATE_ID,
-        templateParams,
-        {
-            publicKey: EMAILJS_PUBLIC_KEY
-        }
-    );
-}
-
-function testEmailSenden() {
-    if (aktuellerUser?.rolle !== "admin") return;
-
-    if (!emailIstKonfiguriert()) {
-        alert("Bitte zuerst EmailJS konfigurieren: Public Key, Service ID und Template ID eintragen.");
-        return;
-    }
-
-    const testProdukt = {
-        name: "Testprodukt",
-        kategorie: "Testkategorie",
-        menge: 1,
-        mindestmenge: 3,
-        lieferantenHomepage: "-"
-    };
-
-    sendeMindestbestandEmail(testProdukt, 1)
-        .then(() => {
-            alert("Testmail wurde versendet.");
-        })
-        .catch((error) => {
-            console.error("Testmail fehlgeschlagen:", error);
-            alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
-        });
-}
-
 function login() {
-    if (!datenGeladen) {
-        alert("Die Daten werden noch geladen. Bitte kurz warten.");
-        return;
-    }
-
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value.trim();
 
@@ -735,77 +548,122 @@ function logout() {
     location.reload();
 }
 
-function eigenesPasswortAendern() {
-    if (!aktuellerUser) return;
-
-    const aktuellesPasswort = document.getElementById("eigenesAktuellesPasswort").value.trim();
-    const neuesPasswort = document.getElementById("eigenesNeuesPasswort").value.trim();
-    const neuesPasswortWiederholen = document.getElementById("eigenesNeuesPasswortWiederholen").value.trim();
-
-    if (!aktuellesPasswort || !neuesPasswort || !neuesPasswortWiederholen) {
-        alert("Bitte alle Passwortfelder ausfüllen.");
-        return;
-    }
-
-    if (aktuellesPasswort !== aktuellerUser.password) {
-        alert("Das aktuelle Passwort ist falsch.");
-        return;
-    }
-
-    if (neuesPasswort.length < 4) {
-        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
-        return;
-    }
-
-    if (neuesPasswort !== neuesPasswortWiederholen) {
-        alert("Die neuen Passwörter stimmen nicht überein.");
-        return;
-    }
-
-    const userIndex = users.findIndex(u => u.username === aktuellerUser.username);
-    if (userIndex === -1) {
-        alert("Benutzer wurde nicht gefunden.");
-        return;
-    }
-
-    users[userIndex].password = neuesPasswort;
-    aktuellerUser.password = neuesPasswort;
-    speichern();
-
-    document.getElementById("eigenesAktuellesPasswort").value = "";
-    document.getElementById("eigenesNeuesPasswort").value = "";
-    document.getElementById("eigenesNeuesPasswortWiederholen").value = "";
-
-    alert("Dein Passwort wurde erfolgreich geändert.");
+function speichern() {
+    localStorage.setItem("produkte", JSON.stringify(produkte));
+    localStorage.setItem("entnahmen", JSON.stringify(entnahmen));
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("warenkorb", JSON.stringify(warenkorb));
 }
 
-function adminPasswortAendern(username) {
+function formLeeren() {
+    document.getElementById("name").value = "";
+    document.getElementById("kategorie").value = "";
+    document.getElementById("menge").value = "";
+    document.getElementById("mindestmenge").value = "";
+    document.getElementById("lieferantenHomepage").value = "";
+}
+
+function sichereURL(url) {
+    if (!url) return "";
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        return "https://" + url;
+    }
+    return url;
+}
+
+function datumDeutsch() {
+    return new Date().toLocaleString("de-DE");
+}
+
+function istGleichesProdukt(a, b) {
+    return a.name.trim().toLowerCase() === b.name.trim().toLowerCase() &&
+           a.kategorie.trim().toLowerCase() === b.kategorie.trim().toLowerCase();
+}
+
+function emailIstKonfiguriert() {
+    return EMAILJS_PUBLIC_KEY !== "DEIN_PUBLIC_KEY" &&
+           EMAILJS_SERVICE_ID !== "DEIN_SERVICE_ID" &&
+           EMAILJS_TEMPLATE_ID !== "DEIN_TEMPLATE_ID";
+}
+
+function getProduktById(id) {
+    return produkte.find(p => p.id === id);
+}
+
+function berechneMengeImWarenkorb(produktId) {
+    return warenkorb
+        .filter(w => w.produktId === produktId)
+        .reduce((summe, w) => summe + Number(w.menge || 0), 0);
+}
+
+function bereinigeWarenkorb() {
+    warenkorb = warenkorb.filter(w => {
+        const produkt = getProduktById(w.produktId);
+        return !!produkt;
+    });
+    speichern();
+}
+
+function sendeMindestbestandEmail(produkt, entnommeneMenge) {
+    if (!emailIstKonfiguriert()) {
+        console.warn("EmailJS ist noch nicht konfiguriert.");
+        return Promise.reject("EmailJS nicht konfiguriert");
+    }
+
+    const templateParams = {
+        to_email: BENACHRICHTIGUNGS_EMAIL,
+        produkt_name: produkt.name,
+        kategorie: produkt.kategorie,
+        lieferant: produkt.lieferantenHomepage,
+        aktueller_bestand: produkt.menge,
+        mindestbestand: produkt.mindestmenge,
+        entnommene_menge: entnommeneMenge,
+        artist: aktuellerUser ? aktuellerUser.username : "System",
+        zeitpunkt: datumDeutsch(),
+        nachricht:
+`Der Mindestbestand wurde unterschritten.
+
+Produkt: ${produkt.name}
+Kategorie: ${produkt.kategorie}
+Lieferant: ${produkt.lieferantenHomepage}
+Aktueller Bestand: ${produkt.menge}
+Mindestbestand: ${produkt.mindestmenge}
+Entnommene Menge: ${entnommeneMenge}
+ARTIST: ${aktuellerUser ? aktuellerUser.username : "System"}
+Zeitpunkt: ${datumDeutsch()}`
+    };
+
+    return emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams
+    );
+}
+
+function testEmailSenden() {
     if (aktuellerUser?.rolle !== "admin") return;
 
-    const feldId = "adminPasswort_" + safeInputId(username);
-    const neuesPasswort = document.getElementById(feldId).value.trim();
-
-    if (!neuesPasswort) {
-        alert("Bitte ein neues Passwort eingeben.");
+    if (!emailIstKonfiguriert()) {
+        alert("Bitte zuerst EmailJS konfigurieren: Public Key, Service ID und Template ID eintragen.");
         return;
     }
 
-    if (neuesPasswort.length < 4) {
-        alert("Das neue Passwort muss mindestens 4 Zeichen lang sein.");
-        return;
-    }
+    const testProdukt = {
+        name: "Testprodukt",
+        kategorie: "Testkategorie",
+        menge: 1,
+        mindestmenge: 3,
+        lieferantenHomepage: "-"
+    };
 
-    const userIndex = users.findIndex(u => u.username === username);
-    if (userIndex === -1) {
-        alert("Benutzer wurde nicht gefunden.");
-        return;
-    }
-
-    users[userIndex].password = neuesPasswort;
-    speichern();
-    document.getElementById(feldId).value = "";
-
-    alert(`Passwort für "${username}" wurde geändert.`);
+    sendeMindestbestandEmail(testProdukt, 1)
+        .then(() => {
+            alert("Testmail wurde versendet.");
+        })
+        .catch((error) => {
+            console.error("Testmail fehlgeschlagen:", error);
+            alert("Testmail konnte nicht versendet werden. Bitte EmailJS prüfen.");
+        });
 }
 
 function produktSpeichern() {
@@ -833,7 +691,8 @@ function produktSpeichern() {
         kategorie: produktKategorie,
         menge: produktMenge,
         mindestmenge: produktMindestmenge,
-        lieferantenHomepage: produktLieferantenHomepage
+        lieferantenHomepage: produktLieferantenHomepage,
+        nachbestellt: bearbeiteIndex === -1 ? false : !!produkte[bearbeiteIndex].nachbestellt
     };
 
     if (bearbeiteIndex === -1) {
@@ -906,10 +765,25 @@ function produkteAnzeigen() {
             ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
             : `-`;
 
+        let statusHTML = `<span class="status-badge status-normal">OK</span>`;
+
+        if (istNiedrig && p.nachbestellt) {
+            statusHTML = `<span class="status-badge status-ordered">NACHBESTELLT</span>`;
+        } else if (istNiedrig && !p.nachbestellt) {
+            statusHTML = `<span class="status-badge status-pending">NICHT NACHBESTELLT</span>`;
+        }
+
         const verwaltungHTML = aktuellerUser?.rolle === "admin"
             ? `
                 <button class="action-btn edit-btn" onclick="produktBearbeiten(${index})">Bearbeiten</button>
                 <button class="action-btn restock-btn" onclick="produktAufstocken(${index})">Aufstocken</button>
+                ${
+                    istNiedrig
+                        ? `<button class="action-btn order-btn" onclick="nachbestellStatusWechseln(${index})">
+                            ${p.nachbestellt ? 'Bestellung zurücksetzen' : 'Als nachbestellt markieren'}
+                           </button>`
+                        : `<button class="action-btn order-btn" disabled>Nicht nötig</button>`
+                }
                 <button class="action-btn delete-btn" onclick="produktLoeschen(${index})">Löschen</button>
               `
             : ``;
@@ -921,6 +795,7 @@ function produkteAnzeigen() {
                 <td>${p.menge}</td>
                 <td>${p.mindestmenge}</td>
                 <td>${linkHTML}</td>
+                <td>${statusHTML}</td>
                 <td>
                     <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
                 </td>
@@ -962,10 +837,27 @@ function produktAufstocken(index) {
     }
 
     produkte[index].menge += aufstockMenge;
+    produkte[index].nachbestellt = false;
     speichern();
     produkteAnzeigen();
 
     alert(`Bestand von "${produkte[index].name}" wurde um ${aufstockMenge} erhöht.`);
+}
+
+function nachbestellStatusWechseln(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    const produkt = produkte[index];
+    if (!produkt) return;
+
+    if (produkt.menge > produkt.mindestmenge) {
+        alert("Dieses Produkt ist nicht im roten Bereich.");
+        return;
+    }
+
+    produkt.nachbestellt = !produkt.nachbestellt;
+    speichern();
+    produkteAnzeigen();
 }
 
 function bearbeitungAbbrechen() {
@@ -1115,6 +1007,7 @@ function warenkorbAuschecken() {
 
     for (let eintrag of warenkorb) {
         const produkt = getProduktById(eintrag.produktId);
+        const alterBestand = produkt.menge;
 
         produkt.menge -= eintrag.menge;
 
@@ -1126,6 +1019,7 @@ function warenkorbAuschecken() {
         });
 
         const mindestbestandNeuUnterschritten =
+            alterBestand > produkt.mindestmenge &&
             produkt.menge <= produkt.mindestmenge;
 
         if (mindestbestandNeuUnterschritten && emailIstKonfiguriert()) {
@@ -1148,12 +1042,8 @@ function warenkorbAuschecken() {
 
     emailBenachrichtigungen.forEach(eintrag => {
         sendeMindestbestandEmail(eintrag.produkt, eintrag.menge)
-            .then(() => {
-                console.log(`E-Mail für ${eintrag.produkt.name} erfolgreich gesendet.`);
-            })
             .catch(error => {
                 console.error("E-Mail Versand fehlgeschlagen:", error);
-                alert(`E-Mail für "${eintrag.produkt.name}" konnte nicht versendet werden. Bitte Browser-Konsole prüfen.`);
             });
     });
 
@@ -1267,20 +1157,14 @@ function userAnzeigen() {
     const userTabelle = document.getElementById("userTabelle");
     userTabelle.innerHTML = "";
 
-    users.forEach((u) => {
+    users.forEach((u, index) => {
         if (u.rolle !== "admin") {
-            const feldId = "adminPasswort_" + safeInputId(u.username);
-
             userTabelle.innerHTML += `
                 <tr>
                     <td>${u.username}</td>
                     <td>${u.rolle.toUpperCase()}</td>
                     <td>
-                        <input class="admin-user-input" type="password" id="${feldId}" placeholder="Neues Passwort">
-                    </td>
-                    <td>
-                        <button class="edit-btn" onclick="adminPasswortAendern('${u.username.replace(/'/g, "\\'")}')">Passwort ändern</button>
-                        <button class="delete-btn" onclick="artistLoeschen('${u.username.replace(/'/g, "\\'")}')">Löschen</button>
+                        <button class="delete-btn" onclick="artistLoeschen(${index})">Löschen</button>
                     </td>
                 </tr>
             `;
@@ -1288,19 +1172,13 @@ function userAnzeigen() {
     });
 }
 
-function artistLoeschen(username) {
+function artistLoeschen(index) {
     if (aktuellerUser?.rolle !== "admin") return;
 
-    const userIndex = users.findIndex(u => u.username === username);
-    if (userIndex === -1) {
-        alert("Benutzer wurde nicht gefunden.");
-        return;
-    }
-
-    const bestaetigt = confirm(`ARTIST "${users[userIndex].username}" wirklich löschen?`);
+    const bestaetigt = confirm(`ARTIST "${users[index].username}" wirklich löschen?`);
     if (!bestaetigt) return;
 
-    users.splice(userIndex, 1);
+    users.splice(index, 1);
     speichern();
     userAnzeigen();
 }
@@ -1316,12 +1194,6 @@ document.getElementById("loginPass").addEventListener("keydown", function(event)
         login();
     }
 });
-
-async function appStart() {
-    await ladeDatenAusFirebase();
-}
-
-appStart();
 </script>
 
 </body>
