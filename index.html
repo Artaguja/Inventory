@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ART AGUJA INVENTORY SYSTEM</title>
 
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ART AGUJA">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.10.0/firebase-app-compat.js"></script>
@@ -52,7 +56,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 40px auto 20px auto;
     background: white;
     padding: 20px;
@@ -242,6 +246,35 @@ th {
     margin: 0;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+    min-width: 105px;
+}
+
+.status-ja {
+    background: #d7f5df;
+    color: #0d5c2f;
+    border: 1px solid #8fd2a4;
+}
+
+.status-nein {
+    background: #f0f0f0;
+    color: #555;
+    border: 1px solid #d0d0d0;
+}
+
+.reorder-btn {
+    background: #8a5a00;
+}
+
+.reset-reorder-btn {
+    background: #555;
+}
+
 @media (max-width: 900px) {
     .header {
         flex-direction: column;
@@ -325,6 +358,7 @@ th {
             <select id="lagerFilter" onchange="produkteAnzeigen()">
                 <option value="alle">Alle Bestände</option>
                 <option value="niedrig">Nur niedriger Bestand</option>
+                <option value="nachbestellt">Nur nachbestellte Produkte</option>
             </select>
             <div class="small-note">
                 Rot markierte Produkte haben den Mindestbestand erreicht oder unterschritten.
@@ -400,6 +434,7 @@ th {
                     <th>Bestand</th>
                     <th>Mindestmenge</th>
                     <th>Lieferant</th>
+                    <th>Nachbestellt</th>
                     <th>Menge</th>
                     <th id="verwaltungsSpalte">Verwaltung</th>
                 </tr>
@@ -474,7 +509,8 @@ function datenNormalisieren() {
         kategorie: p.kategorie || "",
         menge: Number.isFinite(Number(p.menge)) ? Number(p.menge) : 0,
         mindestmenge: Number.isFinite(Number(p.mindestmenge)) ? Number(p.mindestmenge) : 0,
-        lieferantenHomepage: p.lieferantenHomepage || ""
+        lieferantenHomepage: p.lieferantenHomepage || "",
+        nachbestellt: !!p.nachbestellt
     }));
 
     users = users.map(u => {
@@ -603,6 +639,54 @@ function safeInputId(text) {
     return String(text).replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
+function appleTouchIconFallbackErstellen() {
+    const vorhandenerLink = document.querySelector('link[rel="apple-touch-icon"]');
+    const testBild = new Image();
+
+    testBild.onload = function() {
+        console.log("apple-touch-icon.png gefunden.");
+    };
+
+    testBild.onerror = function() {
+        const logo = new Image();
+
+        logo.onload = function() {
+            const canvas = document.createElement("canvas");
+            canvas.width = 180;
+            canvas.height = 180;
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, 180, 180);
+
+            const padding = 18;
+            const zielGroesse = 180 - padding * 2;
+            ctx.drawImage(logo, padding, padding, zielGroesse, zielGroesse);
+
+            const dataUrl = canvas.toDataURL("image/png");
+
+            if (vorhandenerLink) {
+                vorhandenerLink.href = dataUrl;
+            } else {
+                const link = document.createElement("link");
+                link.rel = "apple-touch-icon";
+                link.href = dataUrl;
+                document.head.appendChild(link);
+            }
+
+            console.log("Apple Touch Icon wurde automatisch aus logo.png erstellt.");
+        };
+
+        logo.onerror = function() {
+            console.warn("Weder apple-touch-icon.png noch logo.png konnten als Apple Icon verwendet werden.");
+        };
+
+        logo.src = "logo.png";
+    };
+
+    testBild.src = "apple-touch-icon.png";
+}
+
 function sendeMindestbestandEmail(produkt, entnommeneMenge) {
     if (!emailIstKonfiguriert()) {
         console.warn("EmailJS ist noch nicht konfiguriert.");
@@ -679,7 +763,7 @@ function login() {
 
     const gefunden = users.find(u => u.username === user && u.password === pass);
     if (!gefunden) {
-        alert("Falsche Daten");
+        alert("Falscher Login");
         return;
     }
 
@@ -827,7 +911,8 @@ function produktSpeichern() {
         kategorie: produktKategorie,
         menge: produktMenge,
         mindestmenge: produktMindestmenge,
-        lieferantenHomepage: produktLieferantenHomepage
+        lieferantenHomepage: produktLieferantenHomepage,
+        nachbestellt: bearbeiteIndex === -1 ? false : !!produkte[bearbeiteIndex].nachbestellt
     };
 
     if (bearbeiteIndex === -1) {
@@ -844,6 +929,10 @@ function produktSpeichern() {
 
                 if (produktLieferantenHomepage) {
                     produkte[vorhandenesProduktIndex].lieferantenHomepage = produktLieferantenHomepage;
+                }
+
+                if (produkte[vorhandenesProduktIndex].nachbestellt) {
+                    produkte[vorhandenesProduktIndex].nachbestellt = false;
                 }
 
                 speichern();
@@ -892,7 +981,12 @@ function produkteAnzeigen() {
 
         const passtSuche = name.includes(suchbegriff) || kategorie.includes(suchbegriff);
         const istNiedrig = p.menge <= p.mindestmenge;
-        const passtFilter = lagerFilter === "alle" || (lagerFilter === "niedrig" && istNiedrig);
+        const istNachbestellt = !!p.nachbestellt;
+
+        let passtFilter = false;
+        if (lagerFilter === "alle") passtFilter = true;
+        if (lagerFilter === "niedrig" && istNiedrig) passtFilter = true;
+        if (lagerFilter === "nachbestellt" && istNachbestellt) passtFilter = true;
 
         if (!passtSuche || !passtFilter) return;
 
@@ -900,10 +994,17 @@ function produkteAnzeigen() {
             ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
             : `-`;
 
+        const statusHTML = istNachbestellt
+            ? `<span class="status-badge status-ja">Ja</span>`
+            : `<span class="status-badge status-nein">Nein</span>`;
+
         const verwaltungHTML = aktuellerUser?.rolle === "admin"
             ? `
                 <button class="action-btn edit-btn" onclick="produktBearbeiten(${index})">Bearbeiten</button>
                 <button class="action-btn restock-btn" onclick="produktAufstocken(${index})">Aufstocken</button>
+                <button class="action-btn ${istNachbestellt ? 'reset-reorder-btn' : 'reorder-btn'}" onclick="produktNachbestelltToggle(${index})">
+                    ${istNachbestellt ? 'Nachbestellt zurücksetzen' : 'Nachbestellen'}
+                </button>
                 <button class="action-btn delete-btn" onclick="produktLoeschen(${index})">Löschen</button>
               `
             : ``;
@@ -915,6 +1016,7 @@ function produkteAnzeigen() {
                 <td>${p.menge}</td>
                 <td>${p.mindestmenge}</td>
                 <td>${linkHTML}</td>
+                <td>${statusHTML}</td>
                 <td>
                     <input type="number" id="entnahme${p.id}" value="" min="0" placeholder="0" style="width:70px;">
                 </td>
@@ -924,6 +1026,14 @@ function produkteAnzeigen() {
             </tr>
         `;
     });
+
+    if (tabelle.innerHTML.trim() === "") {
+        tabelle.innerHTML = `
+            <tr>
+                <td colspan="8">Keine Produkte gefunden.</td>
+            </tr>
+        `;
+    }
 }
 
 function produktBearbeiten(index) {
@@ -956,10 +1066,29 @@ function produktAufstocken(index) {
     }
 
     produkte[index].menge += aufstockMenge;
+
+    if (produkte[index].nachbestellt) {
+        produkte[index].nachbestellt = false;
+    }
+
     speichern();
     produkteAnzeigen();
 
     alert(`Bestand von "${produkte[index].name}" wurde um ${aufstockMenge} erhöht.`);
+}
+
+function produktNachbestelltToggle(index) {
+    if (aktuellerUser?.rolle !== "admin") return;
+
+    produkte[index].nachbestellt = !produkte[index].nachbestellt;
+    speichern();
+    produkteAnzeigen();
+
+    if (produkte[index].nachbestellt) {
+        alert(`"${produkte[index].name}" wurde als nachbestellt markiert.`);
+    } else {
+        alert(`Nachbestellt-Status von "${produkte[index].name}" wurde zurückgesetzt.`);
+    }
 }
 
 function bearbeitungAbbrechen() {
@@ -1312,6 +1441,7 @@ document.getElementById("loginPass").addEventListener("keydown", function(event)
 });
 
 async function appStart() {
+    appleTouchIconFallbackErstellen();
     await ladeDatenAusFirebase();
 }
 
