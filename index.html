@@ -262,9 +262,9 @@ th {
 }
 
 .status-nein {
-    background: #f0f0f0;
-    color: #555;
-    border: 1px solid #d0d0d0;
+    background: #ffd6d6;
+    color: #7a0000;
+    border: 1px solid #e4a5a5;
 }
 
 .reorder-btn {
@@ -442,11 +442,11 @@ th {
             <tbody id="produktTabelle"></tbody>
         </table>
 
-        <button class="bulk-cart-btn" onclick="alleEingabenInWarenkorb()">Ausgewählte Mengen in den Warenkorb</button>
+        <button class="bulk-cart-btn" onclick="alleEingabenInInkbasket()">Ausgewählte Mengen in den Inkbasket</button>
 
         <div class="cart-box">
-            <h3>Warenkorb</h3>
-            <button class="checkout-btn" onclick="warenkorbAuschecken()">Warenkorb komplett auschecken</button>
+            <h3>Inkbasket</h3>
+            <button class="checkout-btn" onclick="inkbasketAuschecken()">Inkbasket komplett auschecken</button>
             <table>
                 <thead>
                     <tr>
@@ -456,7 +456,7 @@ th {
                         <th>Aktion</th>
                     </tr>
                 </thead>
-                <tbody id="warenkorbTabelle"></tbody>
+                <tbody id="inkbasketTabelle"></tbody>
             </table>
         </div>
 
@@ -491,7 +491,7 @@ const appDoc = db.collection("app").doc("inventoryData");
 let produkte = [];
 let entnahmen = [];
 let users = [];
-let warenkorb = [];
+let inkbasket = [];
 
 let aktuellerUser = null;
 let bearbeiteIndex = -1;
@@ -501,7 +501,7 @@ function datenNormalisieren() {
     produkte = Array.isArray(produkte) ? produkte : [];
     entnahmen = Array.isArray(entnahmen) ? entnahmen : [];
     users = Array.isArray(users) ? users : [];
-    warenkorb = Array.isArray(warenkorb) ? warenkorb : [];
+    inkbasket = Array.isArray(inkbasket) ? inkbasket : [];
 
     produkte = produkte.map(p => ({
         id: p.id || ("p_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8)),
@@ -552,12 +552,12 @@ async function ladeDatenAusFirebase() {
             produkte = data.produkte || [];
             entnahmen = data.entnahmen || [];
             users = data.users || [];
-            warenkorb = data.warenkorb || [];
+            inkbasket = data.inkbasket || data.warenkorb || [];
         } else {
             produkte = [];
             entnahmen = [];
             users = [];
-            warenkorb = [];
+            inkbasket = [];
         }
 
         datenNormalisieren();
@@ -578,7 +578,7 @@ async function speichern() {
             produkte: produkte,
             entnahmen: entnahmen,
             users: users,
-            warenkorb: warenkorb
+            inkbasket: inkbasket
         });
     } catch (error) {
         console.error("Fehler beim Speichern in Firebase:", error);
@@ -621,14 +621,14 @@ function getProduktById(id) {
     return produkte.find(p => p.id === id);
 }
 
-function berechneMengeImWarenkorb(produktId) {
-    return warenkorb
+function berechneMengeImInkbasket(produktId) {
+    return inkbasket
         .filter(w => w.produktId === produktId)
         .reduce((summe, w) => summe + Number(w.menge || 0), 0);
 }
 
-function bereinigeWarenkorb() {
-    warenkorb = warenkorb.filter(w => {
+function bereinigeInkbasket() {
+    inkbasket = inkbasket.filter(w => {
         const produkt = getProduktById(w.produktId);
         return !!produkt;
     });
@@ -763,7 +763,7 @@ function login() {
 
     const gefunden = users.find(u => u.username === user && u.password === pass);
     if (!gefunden) {
-        alert("Falscher Login");
+        alert("Falscher Login du Otto");
         return;
     }
 
@@ -803,9 +803,9 @@ function login() {
         document.getElementById("cancelEditBtn").style.display = "none";
     }
 
-    bereinigeWarenkorb();
+    bereinigeInkbasket();
     produkteAnzeigen();
-    warenkorbAnzeigen();
+    inkbasketAnzeigen();
 }
 
 function logout() {
@@ -949,7 +949,7 @@ function produktSpeichern() {
         produkte.push(produkt);
     } else {
         produkte[bearbeiteIndex] = produkt;
-        warenkorb = warenkorb.map(w => {
+        inkbasket = inkbasket.map(w => {
             if (w.produktId === produkt.id) {
                 return {
                     ...w,
@@ -963,7 +963,7 @@ function produktSpeichern() {
 
     speichern();
     produkteAnzeigen();
-    warenkorbAnzeigen();
+    inkbasketAnzeigen();
     formLeeren();
     bearbeitungAbbrechen();
 }
@@ -975,20 +975,32 @@ function produkteAnzeigen() {
     const suchbegriff = document.getElementById("suche")?.value.toLowerCase() || "";
     const lagerFilter = document.getElementById("lagerFilter")?.value || "alle";
 
-    produkte.forEach((p, index) => {
-        const name = (p.name || "").toLowerCase();
-        const kategorie = (p.kategorie || "").toLowerCase();
+    const sortierteProdukte = produkte
+        .map((p, index) => ({ p, index }))
+        .filter(({ p }) => {
+            const name = (p.name || "").toLowerCase();
+            const kategorie = (p.kategorie || "").toLowerCase();
 
-        const passtSuche = name.includes(suchbegriff) || kategorie.includes(suchbegriff);
+            const passtSuche = name.includes(suchbegriff) || kategorie.includes(suchbegriff);
+            const istNiedrig = p.menge <= p.mindestmenge;
+            const istNachbestellt = !!p.nachbestellt;
+
+            let passtFilter = false;
+            if (lagerFilter === "alle") passtFilter = true;
+            if (lagerFilter === "niedrig" && istNiedrig) passtFilter = true;
+            if (lagerFilter === "nachbestellt" && istNachbestellt) passtFilter = true;
+
+            return passtSuche && passtFilter;
+        })
+        .sort((a, b) => {
+            const aLow = a.p.menge <= a.p.mindestmenge ? 1 : 0;
+            const bLow = b.p.menge <= b.p.mindestmenge ? 1 : 0;
+            return bLow - aLow;
+        });
+
+    sortierteProdukte.forEach(({ p, index }) => {
         const istNiedrig = p.menge <= p.mindestmenge;
         const istNachbestellt = !!p.nachbestellt;
-
-        let passtFilter = false;
-        if (lagerFilter === "alle") passtFilter = true;
-        if (lagerFilter === "niedrig" && istNiedrig) passtFilter = true;
-        if (lagerFilter === "nachbestellt" && istNachbestellt) passtFilter = true;
-
-        if (!passtSuche || !passtFilter) return;
 
         const linkHTML = p.lieferantenHomepage
             ? `<a href="${p.lieferantenHomepage}" target="_blank">Link</a>`
@@ -1108,14 +1120,14 @@ function produktLoeschen(index) {
     const geloeschteProduktId = produkte[index].id;
 
     produkte.splice(index, 1);
-    warenkorb = warenkorb.filter(w => w.produktId !== geloeschteProduktId);
+    inkbasket = inkbasket.filter(w => w.produktId !== geloeschteProduktId);
 
     speichern();
     produkteAnzeigen();
-    warenkorbAnzeigen();
+    inkbasketAnzeigen();
 }
 
-function alleEingabenInWarenkorb() {
+function alleEingabenInInkbasket() {
     let hatMindestensEineMenge = false;
 
     for (let produkt of produkte) {
@@ -1136,8 +1148,8 @@ function alleEingabenInWarenkorb() {
 
         hatMindestensEineMenge = true;
 
-        const bereitsImWarenkorb = berechneMengeImWarenkorb(produkt.id);
-        if (bereitsImWarenkorb + menge > produkt.menge) {
+        const bereitsImInkbasket = berechneMengeImInkbasket(produkt.id);
+        if (bereitsImInkbasket + menge > produkt.menge) {
             alert(`Nicht genug Bestand für "${produkt.name}".`);
             return;
         }
@@ -1158,12 +1170,12 @@ function alleEingabenInWarenkorb() {
         const menge = parseInt(rohwert);
         if (isNaN(menge) || menge <= 0) continue;
 
-        const vorhandenerEintrag = warenkorb.find(w => w.produktId === produkt.id);
+        const vorhandenerEintrag = inkbasket.find(w => w.produktId === produkt.id);
 
         if (vorhandenerEintrag) {
             vorhandenerEintrag.menge += menge;
         } else {
-            warenkorb.push({
+            inkbasket.push({
                 produktId: produkt.id,
                 name: produkt.name,
                 kategorie: produkt.kategorie,
@@ -1175,52 +1187,52 @@ function alleEingabenInWarenkorb() {
     }
 
     speichern();
-    warenkorbAnzeigen();
-    alert("Alle eingetragenen Mengen wurden in den Warenkorb gelegt.");
+    inkbasketAnzeigen();
+    alert("Alle eingetragenen Mengen wurden in den Inkbasket gelegt.");
 }
 
-function warenkorbAnzeigen() {
-    const tabelle = document.getElementById("warenkorbTabelle");
+function inkbasketAnzeigen() {
+    const tabelle = document.getElementById("inkbasketTabelle");
     if (!tabelle) return;
 
     tabelle.innerHTML = "";
 
-    if (warenkorb.length === 0) {
+    if (inkbasket.length === 0) {
         tabelle.innerHTML = `
             <tr>
-                <td colspan="4">Warenkorb ist leer.</td>
+                <td colspan="4">Inkbasket ist leer.</td>
             </tr>
         `;
         return;
     }
 
-    warenkorb.forEach((eintrag, index) => {
+    inkbasket.forEach((eintrag, index) => {
         tabelle.innerHTML += `
             <tr>
                 <td>${eintrag.name}</td>
                 <td>${eintrag.kategorie}</td>
                 <td>${eintrag.menge}</td>
                 <td>
-                    <button class="delete-btn" onclick="ausWarenkorbEntfernen(${index})">Entfernen</button>
+                    <button class="delete-btn" onclick="ausInkbasketEntfernen(${index})">Entfernen</button>
                 </td>
             </tr>
         `;
     });
 }
 
-function ausWarenkorbEntfernen(index) {
-    warenkorb.splice(index, 1);
+function ausInkbasketEntfernen(index) {
+    inkbasket.splice(index, 1);
     speichern();
-    warenkorbAnzeigen();
+    inkbasketAnzeigen();
 }
 
-function warenkorbAuschecken() {
-    if (warenkorb.length === 0) {
-        alert("Der Warenkorb ist leer.");
+function inkbasketAuschecken() {
+    if (inkbasket.length === 0) {
+        alert("Der Inkbasket ist leer.");
         return;
     }
 
-    for (let eintrag of warenkorb) {
+    for (let eintrag of inkbasket) {
         const produkt = getProduktById(eintrag.produktId);
 
         if (!produkt) {
@@ -1236,7 +1248,7 @@ function warenkorbAuschecken() {
 
     let emailBenachrichtigungen = [];
 
-    for (let eintrag of warenkorb) {
+    for (let eintrag of inkbasket) {
         const produkt = getProduktById(eintrag.produktId);
 
         produkt.menge -= eintrag.menge;
@@ -1259,10 +1271,10 @@ function warenkorbAuschecken() {
         }
     }
 
-    warenkorb = [];
+    inkbasket = [];
     speichern();
     produkteAnzeigen();
-    warenkorbAnzeigen();
+    inkbasketAnzeigen();
 
     if (aktuellerUser.rolle === "admin") {
         historieAnzeigen();
@@ -1280,7 +1292,7 @@ function warenkorbAuschecken() {
             });
     });
 
-    alert("Warenkorb wurde erfolgreich ausgecheckt.");
+    alert("Inkbasket wurde erfolgreich ausgecheckt.");
 }
 
 function historieAnzeigen() {
